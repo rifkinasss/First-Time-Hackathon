@@ -10,6 +10,8 @@ from app.schemas.fuel_reference import FuelReferenceResponse
 class LoadingCreate(BaseModel):
     equipment_id: int = Field(..., description="ID equipment yang digunakan")
     fuel_reference_id: int = Field(..., description="ID fuel reference yang digunakan")
+    fuel_consumed_liters: Optional[float] = Field(None, gt=0, description="Total fuel aktual selama periode (liter)")
+    operating_hours: Optional[float] = Field(None, gt=0, description="Jam operasi selama periode")
 
 
 # ─── Request ──────────────────────────────────────────────────────────────────
@@ -44,6 +46,11 @@ class LoadingSummaryResponse(BaseModel):
     fuel_cons: float        # equipment.qty × fuel_reference.average
     productivity: float     # equipment.qty × equipment.productivity
     fuel_ratio: float       # round(fuel_cons / productivity, 2)
+    fuel_cons_reference: float = 0.0
+    fuel_cons_actual: Optional[float] = None
+    fuel_ratio_reference: float = 0.0
+    fuel_ratio_actual: Optional[float] = None
+    data_source: str = "OEM_REFERENCE"
     created_at: datetime
 
     class Config:
@@ -56,6 +63,8 @@ class LoadingResponse(BaseModel):
     id: int
     equipment_id: int
     fuel_reference_id: int
+    fuel_consumed_liters: Optional[float] = None
+    operating_hours: Optional[float] = None
     created_at: datetime
     equipment: Optional[EquipmentResponse] = None
     fuel_reference: Optional[FuelReferenceResponse] = None
@@ -75,6 +84,11 @@ class LoadingSummaryDetailResponse(BaseModel):
     fuel_cons: float
     productivity: float
     fuel_ratio: float
+    fuel_cons_reference: float = 0.0
+    fuel_cons_actual: Optional[float] = None
+    fuel_ratio_reference: float = 0.0
+    fuel_ratio_actual: Optional[float] = None
+    data_source: str = "OEM_REFERENCE"
     created_at: datetime
 
     class Config:

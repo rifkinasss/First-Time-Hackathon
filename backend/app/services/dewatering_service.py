@@ -11,8 +11,8 @@ def _run_calculation_engine(db: Session, dewatering: Dewatering) -> None:
     Calculation Engine Dewatering — dipanggil otomatis saat transaksi dewatering disimpan.
 
     Rumus:
-        1. fuel_cons_lhr     = equipment.qty × fuel_reference.average (L/hr)
-        2. total_fuel_liters = equipment.qty × pa × ua × ewh × fuel_reference.average (Liter)
+        1. fuel_cons_lhr     = actual_liters / operating_hours, jika actual tersedia
+        2. total_fuel_liters = actual_liters, jika actual tersedia
         3. fuel_ratio        = round(total_fuel_liters / total_mine_prod_bcm, 4)
     """
     equipment = dewatering.equipment
@@ -24,8 +24,12 @@ def _run_calculation_engine(db: Session, dewatering: Dewatering) -> None:
     ewh = dewatering.ewh
     total_mine_prod = dewatering.total_mine_prod_bcm
 
-    fuel_cons_lhr = qty * fuel_ref.average
-    total_fuel_liters = qty * pa * ua * ewh * fuel_ref.average
+    fuel_cons_reference = qty * fuel_ref.average
+    fuel_ratio_reference = round((qty * pa * ua * ewh * fuel_ref.average) / total_mine_prod, 4)
+    has_actual = dewatering.fuel_consumed_liters is not None and dewatering.operating_hours is not None
+    fuel_cons_actual = dewatering.fuel_consumed_liters / dewatering.operating_hours if has_actual else None
+    fuel_cons_lhr = fuel_cons_actual if fuel_cons_actual is not None else fuel_cons_reference
+    total_fuel_liters = dewatering.fuel_consumed_liters if has_actual else qty * pa * ua * ewh * fuel_ref.average
 
     if total_mine_prod == 0:
         raise ValueError("Total Mine Production BCM tidak boleh 0.")
@@ -42,6 +46,11 @@ def _run_calculation_engine(db: Session, dewatering: Dewatering) -> None:
         total_fuel_liters=total_fuel_liters,
         total_mine_prod_bcm=total_mine_prod,
         fuel_ratio=fuel_ratio,
+        fuel_cons_reference=fuel_cons_reference,
+        fuel_cons_actual=fuel_cons_actual,
+        fuel_ratio_reference=fuel_ratio_reference,
+        fuel_ratio_actual=fuel_ratio if has_actual else None,
+        data_source="OPERATIONAL_ACTUAL" if has_actual else "OEM_REFERENCE",
     )
 
 
@@ -65,6 +74,8 @@ def create_dewatering(db: Session, data: DewateringCreate) -> Dewatering:
         ua=data.ua,
         ewh=data.ewh,
         total_mine_prod_bcm=data.total_mine_prod_bcm,
+        fuel_consumed_liters=data.fuel_consumed_liters,
+        operating_hours=data.operating_hours,
     )
 
     dewatering.equipment = eq_obj
@@ -84,6 +95,8 @@ def auto_calculate_all_dewatering(
     ua: float = 0.63,
     ewh: float = 4899.0,
     total_mine_prod_bcm: float = 91276500.0,
+    fuel_consumed_liters: float | None = None,
+    operating_hours: float | None = None,
 ):
     """
     Kalkulasi otomatis secara BATCH untuk SEMUA unit equipment yang ber-activity 'Dewatering'.
@@ -120,6 +133,8 @@ def auto_calculate_all_dewatering(
             ua=ua,
             ewh=ewh,
             total_mine_prod_bcm=total_mine_prod_bcm,
+            fuel_consumed_liters=fuel_consumed_liters,
+            operating_hours=operating_hours,
         )
         dew_obj = create_dewatering(db, create_data)
 

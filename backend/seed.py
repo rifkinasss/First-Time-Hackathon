@@ -12,6 +12,7 @@ Run dari folder backend:
 import sys
 import os
 import csv
+import random
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -100,6 +101,51 @@ def seed():
             db.commit()
             print(f'✅ Loaded {len(eq_objs)} Equipment rows')
 
+        # 2b. Tambahkan fleet Loading yang realistis dan deterministik.
+        # Data CSV tetap menjadi sumber utama; baris sintetis hanya ditambahkan
+        # bila kombinasi contractor + unit_type + activity belum tersedia.
+        loading_specs = [
+            ('EX26007', 920.0, (2, 5)),
+            ('PC125011R', 310.0, (10, 20)),
+            ('PC1250SP8', 320.0, (8, 16)),
+            ('PC200011R', 820.0, (10, 20)),
+            ('PC20008', 480.0, (8, 18)),
+            ('PC3400', 940.0, (1, 3)),
+            ('PC3400EX11', 1160.0, (1, 2)),
+        ]
+        rng = random.Random(2026)
+        existing_loading = {
+            (eq.contractor_id, eq.unit_type, eq.activity.upper())
+            for eq in db.query(Equipment).all()
+        }
+        synthetic_count = 0
+        for contractor_index, contractor_id in enumerate(contractor_ids):
+            # Lima tipe per contractor memberi variasi fleet tanpa membuat
+            # seluruh contractor memiliki konfigurasi identik.
+            selected_indexes = [
+                (contractor_index + offset) % len(loading_specs)
+                for offset in range(5)
+            ]
+            for spec_index in selected_indexes:
+                unit_type, base_productivity, qty_range = loading_specs[spec_index]
+                key = (contractor_id, unit_type, 'LOADING')
+                if key in existing_loading:
+                    continue
+                productivity_factor = rng.choice([0.92, 0.96, 1.00, 1.04, 1.08])
+                equipment = Equipment(
+                    contractor_id=contractor_id,
+                    unit_type=unit_type,
+                    item='Excavator OB',
+                    activity='Loading',
+                    qty=rng.randint(*qty_range),
+                    productivity=round(base_productivity * productivity_factor, 1),
+                )
+                db.add(equipment)
+                existing_loading.add(key)
+                synthetic_count += 1
+        db.commit()
+        print(f'✅ Added {synthetic_count} realistic synthetic Loading equipment rows')
+
         # 3. Seed Ref Fuel (GLOBAL)
         fuel_csv = os.path.join(data_dir, 'Ref Fuel - Sheet1.csv')
         fr_objs = []
@@ -140,7 +186,19 @@ def seed():
             db.commit()
             print(f'✅ Loaded {len(fr_objs)} Fuel Reference rows')
 
-        # 4. Seed Hauling Distance Reference
+        # 4. Create Loading Transactions and derived summaries from master data.
+        # Idempotent: setiap equipment Loading hanya memiliki satu transaksi
+        # backfill terbaru dan satu loading_summary.
+        from app.services.loading_service import backfill_loading_summaries
+
+        loading_result = backfill_loading_summaries(db, demo_actuals=True)
+        print(
+            '✅ Created/updated Loading Summary: '
+            f"{loading_result['summary_created_or_updated']} summaries "
+            f"from {loading_result['equipment_processed']} equipment rows"
+        )
+
+        # 5. Seed Hauling Distance Reference
         hauling_dist_csv = os.path.join(data_dir, 'Hauling Distance Ref - Sheet1.csv')
         dist_count = 0
         if os.path.exists(hauling_dist_csv):

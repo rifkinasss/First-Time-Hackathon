@@ -1,3 +1,4 @@
+import time
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -10,6 +11,7 @@ from app.schemas.supporting import (
     SupportingBatchCalculateRequest,
     SupportingBatchResponse,
 )
+from app.schemas.response import APIResponse, create_success_response
 from app.services import supporting_service, equipment_service, fuel_service
 from app.repositories import supporting_repo
 
@@ -32,6 +34,8 @@ def calculate_supporting(data: SupportingCalculateRequest, db: Session = Depends
         ua=data.ua,
         ewh=data.ewh,
         total_mine_prod_bcm=data.total_mine_prod_bcm,
+        fuel_consumed_liters=data.fuel_consumed_liters,
+        operating_hours=data.operating_hours,
     )
     return supporting_service.create_supporting(db, create_data)
 
@@ -49,6 +53,8 @@ def calculate_all_supporting(data: SupportingBatchCalculateRequest, db: Session 
         ua=data.ua,
         ewh=data.ewh,
         total_mine_prod_bcm=data.total_mine_prod_bcm,
+        fuel_consumed_liters=data.fuel_consumed_liters,
+        operating_hours=data.operating_hours,
     )
 
 
@@ -72,13 +78,38 @@ def get_supporting_summaries(db: Session = Depends(get_db)):
                     total_fuel_liters=s.summary.total_fuel_liters,
                     total_mine_prod_bcm=s.summary.total_mine_prod_bcm,
                     fuel_ratio=s.summary.fuel_ratio,
+                    fuel_cons_reference=s.summary.fuel_cons_reference,
+                    fuel_cons_actual=s.summary.fuel_cons_actual,
+                    fuel_ratio_reference=s.summary.fuel_ratio_reference,
+                    fuel_ratio_actual=s.summary.fuel_ratio_actual,
+                    data_source=s.summary.data_source,
                     created_at=s.summary.created_at,
                 )
             )
     return result
 
 
-@router.get("/{supporting_id}", response_model=SupportingResponse)
+@router.get("/{supporting_id}", response_model=APIResponse[SupportingResponse])
 def get_supporting(supporting_id: int, db: Session = Depends(get_db)):
-    """GET /supporting/{id} — Detail transaksi Supporting beserta summary."""
-    return supporting_service.get_supporting_or_404(db, supporting_id)
+    """GET /api/v1/supportings/{id} — Detail transaksi Supporting beserta summary."""
+    t0 = time.perf_counter()
+    data = supporting_service.get_supporting_or_404(db, supporting_id)
+    elapsed_ms = f"{(time.perf_counter() - t0) * 1000:.2f} ms"
+    return create_success_response(
+        data=data,
+        message=f"Detail supporting id={supporting_id} berhasil diambil.",
+        execution_time_ms=elapsed_ms,
+    )
+
+
+@router.delete("/{supporting_id}", response_model=APIResponse[dict])
+def delete_supporting(supporting_id: int, db: Session = Depends(get_db)):
+    """DELETE /api/v1/supportings/{id} — Hapus log/transaksi kalkulasi supporting."""
+    t0 = time.perf_counter()
+    supporting_service.delete_supporting(db, supporting_id)
+    elapsed_ms = f"{(time.perf_counter() - t0) * 1000:.2f} ms"
+    return create_success_response(
+        data={"supporting_id": supporting_id},
+        message=f"Log transaksi supporting id={supporting_id} berhasil dihapus.",
+        execution_time_ms=elapsed_ms,
+    )

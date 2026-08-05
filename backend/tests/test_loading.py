@@ -15,7 +15,9 @@ def test_valid_data():
         ]
     })
     assert response.status_code == 200
-    data = response.json()
+    res_json = response.json()
+    assert res_json["success"] is True
+    data = res_json["data"]
     assert data["total_fuel"] == 3 * 187 + 18 * 59           # 561 + 1062 = 1623
     assert data["total_productivity"] == 3 * 920 + 18 * 310  # 2760 + 5580 = 8340
     assert data["fuel_ratio"] == round(1623 / 8340, 2)

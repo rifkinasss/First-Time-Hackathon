@@ -12,6 +12,8 @@ class DewateringCreate(BaseModel):
     ua: float = Field(default=0.63, gt=0, le=1.0, description="Use of Availability (0.63 = 63%)")
     ewh: float = Field(default=4899.0, gt=0, description="Effective Working Hours (jam)")
     total_mine_prod_bcm: float = Field(default=91276500.0, gt=0, description="Total produksi BCM tambang/lokasi")
+    fuel_consumed_liters: Optional[float] = Field(None, ge=0, description="Fuel actual selama periode (Liter)")
+    operating_hours: Optional[float] = Field(None, gt=0, description="Jam operasi aktual selama periode")
 
 
 class DewateringCalculateRequest(BaseModel):
@@ -21,6 +23,8 @@ class DewateringCalculateRequest(BaseModel):
     ua: float = Field(default=0.63, gt=0, le=1.0, description="Use of Availability (0.63 = 63%)")
     ewh: float = Field(default=4899.0, gt=0, description="Effective Working Hours (jam)")
     total_mine_prod_bcm: float = Field(default=91276500.0, gt=0, description="Total produksi BCM tambang/lokasi")
+    fuel_consumed_liters: Optional[float] = Field(None, ge=0, description="Fuel actual selama periode (Liter)")
+    operating_hours: Optional[float] = Field(None, gt=0, description="Jam operasi aktual selama periode")
 
 
 class DewateringSummaryResponse(BaseModel):
@@ -33,6 +37,11 @@ class DewateringSummaryResponse(BaseModel):
     total_fuel_liters: float
     total_mine_prod_bcm: float
     fuel_ratio: float
+    fuel_cons_reference: Optional[float] = None
+    fuel_cons_actual: Optional[float] = None
+    fuel_ratio_reference: Optional[float] = None
+    fuel_ratio_actual: Optional[float] = None
+    data_source: str = "OEM_REFERENCE"
     created_at: datetime
 
     class Config:
@@ -47,6 +56,9 @@ class DewateringResponse(BaseModel):
     ua: float
     ewh: float
     total_mine_prod_bcm: float
+    fuel_consumed_liters: Optional[float] = None
+    operating_hours: Optional[float] = None
+    data_source: str = "OEM_REFERENCE"
     created_at: datetime
     equipment: Optional[EquipmentResponse] = None
     fuel_reference: Optional[FuelReferenceResponse] = None
@@ -68,6 +80,11 @@ class DewateringSummaryDetailResponse(BaseModel):
     total_fuel_liters: float
     total_mine_prod_bcm: float
     fuel_ratio: float
+    fuel_cons_reference: Optional[float] = None
+    fuel_cons_actual: Optional[float] = None
+    fuel_ratio_reference: Optional[float] = None
+    fuel_ratio_actual: Optional[float] = None
+    data_source: str = "OEM_REFERENCE"
     created_at: datetime
 
     class Config:
@@ -79,6 +96,8 @@ class DewateringBatchCalculateRequest(BaseModel):
     ua: float = Field(default=0.63, gt=0, le=1.0, description="Use of Availability (0.63 = 63%)")
     ewh: float = Field(default=4899.0, gt=0, description="Effective Working Hours (jam)")
     total_mine_prod_bcm: float = Field(default=91276500.0, gt=0, description="Total produksi BCM tambang/lokasi")
+    fuel_consumed_liters: Optional[float] = Field(None, ge=0)
+    operating_hours: Optional[float] = Field(None, gt=0)
 
 
 class DewateringBatchResponse(BaseModel):

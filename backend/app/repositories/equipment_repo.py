@@ -1,7 +1,7 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.models.equipment import Equipment
-from app.schemas.equipment import EquipmentCreate
+from app.schemas.equipment import EquipmentCreate, EquipmentUpdate
 
 
 def create(db: Session, data: EquipmentCreate) -> Equipment:
@@ -28,3 +28,18 @@ def get_by_unit(db: Session, unit_type: str) -> Optional[Equipment]:
 def get_by_contractor(db: Session, contractor_id: int) -> List[Equipment]:
     """List semua equipment milik contractor tertentu."""
     return db.query(Equipment).filter(Equipment.contractor_id == contractor_id).all()
+
+
+def update(db: Session, equipment: Equipment, data: EquipmentUpdate) -> Equipment:
+    update_dict = data.model_dump(exclude_unset=True)
+    for key, value in update_dict.items():
+        setattr(equipment, key, value)
+    db.commit()
+    db.refresh(equipment)
+    return equipment
+
+
+def delete(db: Session, equipment: Equipment) -> bool:
+    db.delete(equipment)
+    db.commit()
+    return True
