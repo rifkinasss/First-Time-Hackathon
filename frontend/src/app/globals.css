@@ -128,3 +128,42 @@
     @apply font-sans;
   }
 }
+
+/* Light, operational dashboard surface. These overrides keep legacy dashboard
+   components readable while their data visualisations retain semantic colours. */
+@layer utilities {
+  [class*="bg-slate-950"] { background-color: #ffffff !important; }
+  [class*="bg-slate-900"] { background-color: #ffffff !important; }
+  [class*="bg-slate-800"] { background-color: #f8fafc !important; }
+  [class*="border-slate-900"],
+  [class*="border-slate-800"],
+  [class*="border-slate-700"] { border-color: #e2e8f0 !important; }
+  [class*="divide-slate-800"] { border-color: #e2e8f0 !important; }
+  [class*="text-white"],
+  [class*="text-slate-100"],
+  [class*="text-slate-200"],
+  [class*="text-slate-300"] { color: #0f172a !important; }
+  [class*="text-slate-400"] { color: #64748b !important; }
+}
+
+/* Restore the dashboard's intended dark surfaces when the user selects dark mode. */
+.dark [class*="bg-white"] { background-color: #0f172a !important; }
+.dark [class*="bg-slate-950"] { background-color: #020617 !important; }
+.dark [class*="bg-slate-900"] { background-color: #0f172a !important; }
+.dark [class*="bg-slate-800"] { background-color: #1e293b !important; }
+.dark [class*="bg-slate-200"] { background-color: #334155 !important; }
+.dark [class*="bg-slate-50"] { background-color: #1e293b !important; }
+.dark [class*="border-slate-900"],
+.dark [class*="border-slate-800"],
+.dark [class*="border-slate-700"],
+.dark [class*="border-slate-200"] { border-color: #334155 !important; }
+.dark [class*="divide-slate-800"] { border-color: #334155 !important; }
+.dark [class*="text-white"],
+.dark [class*="text-slate-100"],
+.dark [class*="text-slate-200"] { color: #f8fafc !important; }
+.dark [class*="text-slate-900"],
+.dark [class*="text-slate-800"],
+.dark [class*="text-slate-700"],
+.dark [class*="text-slate-600"] { color: #e2e8f0 !important; }
+.dark [class*="text-slate-400"] { color: #94a3b8 !important; }
+.dark [class*="text-slate-300"] { color: #cbd5e1 !important; }
