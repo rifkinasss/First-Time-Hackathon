@@ -10,17 +10,25 @@ import { FuelGauge } from "./fuel-gauge";
 import { MetricCard } from "./metric-card";
 import { StatusBadge } from "./status-badge";
 
+import { useFilterStore } from "@/lib/filters";
+import { FilterBar } from "./filter-bar";
+
 const fmt = (value: number, digits = 0) => value.toLocaleString("en-US", { maximumFractionDigits: digits, minimumFractionDigits: digits });
 const activities: ActivityKey[] = ["loading", "hauling", "supporting", "dewatering"];
 const ActivityIcon = ({ activity }: { activity: ActivityKey }) => activity === "loading" ? <Pickaxe size={17} /> : activity === "hauling" ? <Truck size={17} /> : activity === "supporting" ? <HardHat size={17} /> : <Droplets size={17} />;
 
 export function OverviewPage() {
+  const { from, to, contractor, unit } = useFilterStore();
   const [data, setData] = useState<OverviewResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  useEffect(() => { getOverview().then(setData).finally(() => setLoading(false)); }, []);
+  
+  useEffect(() => { 
+    getOverview({ from, to, contractor, unit }).then(setData).finally(() => setLoading(false)); 
+  }, [from, to, contractor, unit]);
 
   return <div className="dashboard-page">
     <div className="page-header overview-header"><div><div className="breadcrumb"><strong>Overview</strong><span>/</span><span>Executive dashboard</span></div><div className="page-title-row"><div className="page-icon page-icon-overview"><BarChart3 size={22} /></div><div><h1>Operational overview <span className="title-slash">/</span> fuel ratio</h1><p>Activity-based fuel efficiency across Kaltim operations</p></div></div></div><div className="overview-period"><span className="eyebrow">REPORTING WINDOW</span><strong>01 — 21 JUL 2026</strong><span className="period-status"><span className="live-pulse" /> Latest data available</span></div></div>
+    <FilterBar contractors={data?.activities.length ? ["PT. A", "PT. B", "PT. C", "PT. D", "PT. E", "PT. F", "PT. G", "PT. H", "PT. I", "PT. J"] : []} units={[]} />
     {loading || !data ? <div className="loading-state"><LoaderCircle className="spin" size={23} /><span>Loading executive snapshot…</span></div> : <>
       <div className="overview-kpis">
         <MetricCard label="Total fuel consumption" value={`${(data.totalFuelConsumption / 1000).toFixed(1)}k`} unit="L / h" icon={Fuel} accent="amber" note="Across all monitored activities"><div className="metric-spark amber-spark"><i /><i /><i /><i /><i /><i /><i /></div></MetricCard>

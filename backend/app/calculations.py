@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from typing import Any
+from sqlalchemy.orm import Session
 
 from .config import ACTIVITIES, HOURS_PER_YEAR, TOTAL_ANNUAL_PRODUCTION_BCM
-from .data import contractor_for, seed_rows
-from .models import ActivitySummary, UnitRecord
+from .data import seed_rows, get_contractors
+from app.schemas.monitoring import ActivitySummary, UnitRecord
 
 
 def variance(actual: float, target: float) -> float:
@@ -32,10 +33,11 @@ def make_unit(activity: str, raw: dict[str, Any], index: int) -> UnitRecord:
         fuel_ratio = 0
 
     target = config["spo_fr"]
+    contractor = raw.get("contractor") or f"PT. Contractor {index + 1}"
     return UnitRecord(
         unitType=raw["unitType"],
         category=raw.get("category"),
-        contractor=raw.get("contractor", contractor_for(index)),
+        contractor=contractor,
         qty=qty,
         fuelConsumption=fuel,
         productivity=productivity,
@@ -48,12 +50,14 @@ def make_unit(activity: str, raw: dict[str, Any], index: int) -> UnitRecord:
     )
 
 
-def build_units(activity: str) -> list[UnitRecord]:
-    return [make_unit(activity, raw, index) for index, raw in enumerate(seed_rows(activity))]
+def build_units(activity: str, db: Session | None = None) -> list[UnitRecord]:
+    return [make_unit(activity, raw, index) for index, raw in enumerate(seed_rows(activity, db=db))]
 
 
-def filtered_units(activity: str, contractor: str | None, unit: str | None) -> list[UnitRecord]:
-    units = build_units(activity)
+def filtered_units(
+    activity: str, contractor: str | None, unit: str | None, db: Session | None = None
+) -> list[UnitRecord]:
+    units = build_units(activity, db=db)
     if contractor:
         units = [row for row in units if row.contractor.lower() == contractor.lower()]
     if unit:

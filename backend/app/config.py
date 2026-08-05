@@ -19,5 +19,3 @@ ACTIVITIES: dict[str, dict[str, Any]] = {
     "dewatering": {"label": "Dewatering", "spo_fr": 0.3233, "phase": 2.8},
 }
 
-CONTRACTORS = ["PT Borneo Mining", "PT Kaltim Prima", "PT Nusantara Hauling", "PT Sumber Energi"]
-DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "seed.json"

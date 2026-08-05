@@ -1,4 +1,9 @@
+import { ActivityKey, ActivityResponse, MonitoringFilters, OverviewResponse } from "./frms-types";
+import { getMockOverview, getMockActivity } from "./mock-data";
+
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
+// ─── Types for Database API (Surya — Target 1) ─────────────────────────────
 
 export interface Contractor {
   id: number;
@@ -87,6 +92,8 @@ export interface DewateringSummary {
   created_at: string;
 }
 
+// ─── Database API Fetchers (Surya — Target 1) ──────────────────────────────
+
 // Fallback contractors if API is unreachable
 const FALLBACK_CONTRACTORS: Contractor[] = Array.from({ length: 10 }, (_, i) => ({
   id: i + 1,
@@ -99,7 +106,7 @@ const FALLBACK_CONTRACTORS: Contractor[] = Array.from({ length: 10 }, (_, i) => 
 
 export async function fetchContractors(): Promise<Contractor[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/contractor`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE_URL}/api/v1/contractors`, { cache: 'no-store' });
     if (!res.ok) throw new Error("Failed to fetch contractors");
     const data = await res.json();
     return data.length > 0 ? data : FALLBACK_CONTRACTORS;
@@ -111,7 +118,7 @@ export async function fetchContractors(): Promise<Contractor[]> {
 
 export async function fetchEquipment(): Promise<Equipment[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/equipment`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE_URL}/api/v1/equipments`, { cache: 'no-store' });
     if (!res.ok) throw new Error("Failed to fetch equipment");
     return await res.json();
   } catch (error) {
@@ -122,7 +129,7 @@ export async function fetchEquipment(): Promise<Equipment[]> {
 
 export async function fetchLoadingSummaries(): Promise<LoadingSummary[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/loading/summary`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE_URL}/api/v1/loading/summary`, { cache: 'no-store' });
     if (!res.ok) throw new Error("Failed to fetch loading summaries");
     return await res.json();
   } catch (error) {
@@ -133,7 +140,7 @@ export async function fetchLoadingSummaries(): Promise<LoadingSummary[]> {
 
 export async function fetchHaulingSummaries(): Promise<HaulingSummary[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/hauling/summary`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE_URL}/api/v1/hauling/summary`, { cache: 'no-store' });
     if (!res.ok) throw new Error("Failed to fetch hauling summaries");
     return await res.json();
   } catch (error) {
@@ -144,7 +151,7 @@ export async function fetchHaulingSummaries(): Promise<HaulingSummary[]> {
 
 export async function fetchSupportingSummaries(): Promise<SupportingSummary[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/supporting/summary`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE_URL}/api/v1/supporting/summary`, { cache: 'no-store' });
     if (!res.ok) throw new Error("Failed to fetch supporting summaries");
     return await res.json();
   } catch (error) {
@@ -155,11 +162,52 @@ export async function fetchSupportingSummaries(): Promise<SupportingSummary[]> {
 
 export async function fetchDewateringSummaries(): Promise<DewateringSummary[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/dewatering/summary`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE_URL}/api/v1/dewatering/summary`, { cache: 'no-store' });
     if (!res.ok) throw new Error("Failed to fetch dewatering summaries");
     return await res.json();
   } catch (error) {
     console.warn(error);
     return [];
+  }
+}
+
+// ─── Monitoring API Fetchers (Kinas — Target 2) ────────────────────────────
+
+export async function getOverview(
+  filters?: MonitoringFilters
+): Promise<OverviewResponse> {
+  try {
+    const params = new URLSearchParams();
+    if (filters?.from && filters.from !== "all") params.set("from", filters.from);
+    if (filters?.to && filters.to !== "all") params.set("to", filters.to);
+    if (filters?.contractor && filters.contractor !== "all") params.set("contractor", filters.contractor);
+    if (filters?.unit && filters.unit !== "all") params.set("unit", filters.unit);
+    const query = params.toString() ? `?${params.toString()}` : "";
+    const res = await fetch(`${API_BASE_URL}/api/monitoring/overview${query}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error("Failed to fetch overview");
+    return await res.json();
+  } catch (error) {
+    console.warn("Using mock overview data:", error);
+    return getMockOverview(filters);
+  }
+}
+
+export async function getActivity(
+  activity: ActivityKey,
+  filters?: MonitoringFilters,
+): Promise<ActivityResponse> {
+  try {
+    const params = new URLSearchParams();
+    if (filters?.from && filters.from !== "all") params.set("from", filters.from);
+    if (filters?.to && filters.to !== "all") params.set("to", filters.to);
+    if (filters?.contractor && filters.contractor !== "all") params.set("contractor", filters.contractor);
+    if (filters?.unit && filters.unit !== "all") params.set("unit", filters.unit);
+    const query = params.toString() ? `?${params.toString()}` : "";
+    const res = await fetch(`${API_BASE_URL}/api/monitoring/fuel-ratio/${activity}${query}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`Failed to fetch activity: ${activity}`);
+    return await res.json();
+  } catch (error) {
+    console.warn(`Using mock ${activity} data:`, error);
+    return getMockActivity(activity, filters);
   }
 }

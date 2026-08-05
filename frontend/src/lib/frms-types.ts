@@ -61,6 +61,8 @@ export type Filters = {
   unit: string;
 };
 
+export type MonitoringFilters = Partial<Filters>;
+
 export const ACTIVITY_META: Record<ActivityKey, {
   label: string;
   shortLabel: string;

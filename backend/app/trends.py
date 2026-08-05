@@ -2,15 +2,16 @@ from __future__ import annotations
 
 import math
 from datetime import timedelta
+from sqlalchemy.orm import Session
 
 from .calculations import build_units, calculate_actual_fr
 from .config import ACTIVITIES, BASELINE_DATE
-from .models import TrendPoint
+from app.schemas.monitoring import TrendPoint
 
 
-def make_trend(activity: str, days: int = 21) -> list[TrendPoint]:
+def make_trend(activity: str, days: int = 21, db: Session | None = None) -> list[TrendPoint]:
     config = ACTIVITIES[activity]
-    actual_base = calculate_actual_fr(activity, build_units(activity))
+    actual_base = calculate_actual_fr(activity, build_units(activity, db=db))
     points: list[TrendPoint] = []
     for index in range(days):
         wave = 1 + 0.045 * math.sin(index * 0.85 + config["phase"]) + 0.025 * math.cos(index * 0.31)

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { BarChart3, ChevronDown, ChevronRight, CircleHelp, FileText, Gauge, LayoutDashboard, Menu, X } from "lucide-react";
+import { BarChart3, Building2, ChevronDown, ChevronRight, CircleHelp, FileText, Gauge, LayoutDashboard, Menu, X } from "lucide-react";
 import { ACTIVITY_META, ActivityKey } from "@/lib/frms-types";
 
 const activities: ActivityKey[] = ["loading", "hauling", "supporting", "dewatering"];
@@ -32,8 +32,11 @@ export function FrmsShell({ children }: { children: React.ReactNode }) {
 
         <nav className="sidebar-nav" aria-label="Main navigation">
           <span className="nav-label">Workspace</span>
+          <Link href="/" className={`nav-item ${pathname === "/" ? "active" : ""}`} onClick={() => setMobileOpen(false)}>
+            <Building2 size={17} /><span>Multi-Contractor</span><span className="nav-kicker">01</span>
+          </Link>
           <Link href="/overview" className={`nav-item ${pathname === "/overview" ? "active" : ""}`} onClick={() => setMobileOpen(false)}>
-            <LayoutDashboard size={17} /><span>Overview</span><span className="nav-kicker">01</span>
+            <LayoutDashboard size={17} /><span>Overview</span><span className="nav-kicker">02</span>
           </Link>
           <div className="nav-group-label"><span>Fuel ratio monitoring</span><ChevronDown size={14} /></div>
           {activities.map((activity, index) => {
@@ -41,7 +44,7 @@ export function FrmsShell({ children }: { children: React.ReactNode }) {
             const active = pathname === href;
             return <Link key={activity} href={href} className={`nav-item sub-item ${active ? "active" : ""}`} onClick={() => setMobileOpen(false)}>
               <span className={`activity-marker marker-${activity}`} />
-              <span>{ACTIVITY_META[activity].label}</span><span className="nav-kicker">0{index + 2}</span>
+              <span>{ACTIVITY_META[activity].label}</span><span className="nav-kicker">0{index + 3}</span>
             </Link>;
           })}
 

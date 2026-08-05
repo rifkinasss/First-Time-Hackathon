@@ -9,6 +9,7 @@ from app.api.contractor import router as contractor_router
 from app.api.hauling import router as hauling_router
 from app.api.supporting import router as supporting_router
 from app.api.dewatering import router as dewatering_router
+from app.api.monitoring import router as monitoring_router
 
 # Buat semua tabel jika belum ada
 Base.metadata.create_all(bind=engine)
@@ -26,7 +27,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -53,6 +54,9 @@ app.include_router(loading_router, prefix="/api/v1")
 app.include_router(hauling_router, prefix="/api/v1")
 app.include_router(supporting_router, prefix="/api/v1")
 app.include_router(dewatering_router, prefix="/api/v1")
+
+# ─── Monitoring API Routes (Kinas — Target 2) ────────────────────────────────
+app.include_router(monitoring_router, prefix="/api/monitoring")
 
 
 @app.get("/")
