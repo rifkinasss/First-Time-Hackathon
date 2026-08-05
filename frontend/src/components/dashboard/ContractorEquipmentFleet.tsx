@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Equipment } from "@/lib/api";
-import { Wrench, Activity, Truck, HardHat, Anchor, Fuel, Gauge, Layers } from "lucide-react";
+import { Wrench, Activity, Truck, HardHat, Anchor, Layers } from "lucide-react";
 
 interface FleetProps {
   selectedContractorCode: string;
@@ -16,6 +16,22 @@ export const ContractorEquipmentFleet: React.FC<FleetProps> = ({
   equipments,
 }) => {
   const [subFeature, setSubFeature] = useState<string>("ALL");
+  const activityOrder = ["Loading", "Hauling", "Supporting", "Dewatering"];
+  const activityColors: Record<string, { fill: string; text: string }> = {
+    Loading: { fill: "bg-amber-500", text: "text-amber-600" },
+    Hauling: { fill: "bg-sky-500", text: "text-sky-600" },
+    Supporting: { fill: "bg-violet-500", text: "text-violet-600" },
+    Dewatering: { fill: "bg-emerald-500", text: "text-emerald-600" },
+  };
+  const activityHex: Record<string, string> = { Loading: "#f59e0b", Hauling: "#0ea5e9", Supporting: "#8b5cf6", Dewatering: "#10b981" };
+  const activityUnits = Object.fromEntries(activityOrder.map((activity) => [activity, equipments.filter((item) => item.activity === activity).reduce((total, item) => total + item.qty, 0)]));
+  const totalUnits = Object.values(activityUnits).reduce((total, value) => total + value, 0);
+  let angle = 0;
+  const compositionGradient = activityOrder.filter((activity) => activityUnits[activity] > 0).map((activity) => {
+    const start = angle;
+    angle += (activityUnits[activity] / Math.max(totalUnits, 1)) * 360;
+    return `${activityHex[activity]} ${start}deg ${angle}deg`;
+  }).join(", ");
 
   // Filter equipment based on sub-feature tab
   const filteredEquipments = subFeature === "ALL"
@@ -29,25 +45,25 @@ export const ContractorEquipmentFleet: React.FC<FleetProps> = ({
         return {
           icon: Activity,
           color: "bg-amber-500/10 text-amber-400 border-amber-500/30",
-          desc: "Penggalian & Pemuatan OB",
+          desc: "Penggalian dan pemuatan overburden",
         };
       case "Hauling":
         return {
           icon: Truck,
           color: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
-          desc: "Pengangkutan (Jarak 3.90 km / 110 BCM/HR)",
+          desc: "Armada pengangkutan",
         };
       case "Supporting":
         return {
           icon: HardHat,
           color: "bg-purple-500/10 text-purple-400 border-purple-500/30",
-          desc: "Armada Support (PA 90%, UA 53%, EWH 4121h)",
+          desc: "Armada peralatan pendukung",
         };
       default:
         return {
           icon: Anchor,
           color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
-          desc: "Pompa Pengeringan (PA 90%, UA 63%, EWH 4899h)",
+          desc: "Peralatan pengeringan tambang",
         };
     }
   };
@@ -97,6 +113,25 @@ export const ContractorEquipmentFleet: React.FC<FleetProps> = ({
         </div>
       </div>
 
+      <section className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-600">Fleet overview</p>
+            <h3 className="mt-1 text-sm font-bold text-slate-900">Komposisi Armada per Aktivitas</h3>
+            <p className="mt-1 text-[11px] text-slate-500">Proporsi populasi unit pada kontraktor yang sedang dipilih.</p>
+          </div>
+          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 font-mono text-xs font-bold text-slate-700">{totalUnits.toLocaleString("id-ID")} unit</span>
+        </div>
+        <div className="grid items-center gap-7 sm:grid-cols-[156px_minmax(0,1fr)]">
+          <div className="relative mx-auto grid h-36 w-36 place-items-center rounded-full bg-slate-100 p-1">
+            <div className="relative h-full w-full rounded-full" style={{ background: compositionGradient ? `conic-gradient(${compositionGradient})` : "#0f172a" }} role="img" aria-label="Diagram donat komposisi armada per aktivitas">
+              <div className="absolute inset-[21px] flex flex-col items-center justify-center rounded-full border border-slate-100 bg-white text-center"><strong className="font-mono text-2xl tracking-tight text-slate-900">{totalUnits}</strong><span className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">Total unit</span></div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">{activityOrder.map((activity) => { const percent = totalUnits ? (activityUnits[activity] / totalUnits) * 100 : 0; return <div key={activity} className="rounded-xl px-2 py-2"><div className="flex items-center justify-between text-[11px]"><span className="flex items-center gap-2 font-medium text-slate-600"><span className={`h-2.5 w-2.5 rounded-full ${activityColors[activity].fill}`} />{activity}</span><span className="font-mono"><b className={activityColors[activity].text}>{activityUnits[activity]}</b><span className="ml-1 text-slate-500">unit</span></span></div><div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${activityColors[activity].fill}`} style={{ width: `${percent}%` }} /></div><p className="mt-1 text-right text-[10px] text-slate-500">{percent.toFixed(1)}% dari total armada</p></div>; })}</div>
+        </div>
+      </section>
+
       {/* Sub-Feature Tab Navigation */}
       <div className="flex flex-wrap items-center gap-2 mb-6 p-1.5 rounded-xl bg-slate-950/80 border border-slate-800">
         {subFeatureTabs.map((tab) => {
@@ -137,24 +172,6 @@ export const ContractorEquipmentFleet: React.FC<FleetProps> = ({
             const badge = getActivityBadge(eq.activity);
             const Icon = badge.icon;
 
-            let estLhr = 187.0;
-            let estRatio = 0.20;
-
-            if (eq.activity === "Loading") {
-              estLhr = eq.unit_type.includes("EX2600") ? 187.0 : 145.0;
-              const prod = eq.productivity || 920.0;
-              estRatio = parseFloat(((eq.qty * estLhr) / (eq.qty * prod)).toFixed(2));
-            } else if (eq.activity === "Hauling") {
-              estLhr = 77.0;
-              estRatio = 0.70;
-            } else if (eq.activity === "Supporting") {
-              estLhr = 29.0;
-              estRatio = 0.19;
-            } else {
-              estLhr = 40.0;
-              estRatio = 0.18;
-            }
-
             return (
               <div
                 key={eq.id}
@@ -192,17 +209,7 @@ export const ContractorEquipmentFleet: React.FC<FleetProps> = ({
                   </div>
                 </div>
 
-                {/* Bottom Fuel Consumption & Fuel Ratio */}
-                <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5 text-slate-400">
-                    <Fuel className="h-3.5 w-3.5 text-amber-400" />
-                    <span>Est. BBM: <strong className="text-slate-200 font-mono">{estLhr} L/h</strong></span>
-                  </div>
-                  <div className="flex items-center gap-1 text-emerald-400 font-bold font-mono">
-                    <Gauge className="h-3.5 w-3.5" />
-                    <span>{estRatio.toFixed(2)} L/BCM</span>
-                  </div>
-                </div>
+                <div className="border-t border-slate-800 pt-2 text-[11px] text-slate-500">Fuel rate dan Fuel Ratio ditampilkan pada ringkasan aktivitas bila summary tersedia.</div>
               </div>
             );
           })}

@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { Building2, Activity, Target, Fuel } from "lucide-react";
+import React, { useEffect, useSyncExternalStore } from "react";
+import { Building2, Activity, Target, Fuel, Moon, Sun } from "lucide-react";
 
 interface HeaderProps {
   activeFeature: number;
@@ -9,61 +9,50 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ activeFeature, setActiveFeature }) => {
+  const isDark = useSyncExternalStore(
+    (onStoreChange) => {
+      window.addEventListener("storage", onStoreChange);
+      window.addEventListener("frms-theme-change", onStoreChange);
+      return () => {
+        window.removeEventListener("storage", onStoreChange);
+        window.removeEventListener("frms-theme-change", onStoreChange);
+      };
+    },
+    () => localStorage.getItem("frms-theme") === "dark",
+    () => false
+  );
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", isDark);
+  }, [isDark]);
+
+  const setTheme = (theme: "light" | "dark") => {
+    localStorage.setItem("frms-theme", theme);
+    window.dispatchEvent(new Event("frms-theme-change"));
+  };
+
   const features = [
-    {
-      id: 1,
-      title: "Monitoring Multi Kontraktor",
-      subtitle: "Performa & Efisiensi Fuel Ratio PT. A - J",
-      icon: Building2,
-      activeColor: "border-amber-500 bg-amber-500/10 text-amber-400",
-      badge: "Active Feature",
-    },
-    {
-      id: 2,
-      title: "Konsumsi Fuel Berbasis Aktivitas",
-      subtitle: "Monitoring Volume / BCM / Working Hours",
-      icon: Activity,
-      activeColor: "border-cyan-500 bg-cyan-500/10 text-cyan-400",
-      badge: "Module 2",
-    },
-    {
-      id: 3,
-      title: "Penyelarasan SPO & Target",
-      subtitle: "Evaluasi Parameter Operasi & Target Produksi",
-      icon: Target,
-      activeColor: "border-emerald-500 bg-emerald-500/10 text-emerald-400",
-      badge: "Module 3",
-    },
+    { id: 1, title: "Monitoring Kontraktor", subtitle: "Performa dan fuel ratio", icon: Building2 },
+    { id: 2, title: "Konsumsi Berdasarkan Aktivitas", subtitle: "Volume, BCM, dan jam kerja", icon: Activity },
+    { id: 3, title: "SPO dan Target", subtitle: "Parameter operasi dan produksi", icon: Target },
   ];
 
   return (
-    <header className="w-full bg-slate-900/90 border-b border-slate-800 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-        {/* Brand Logo */}
+    <aside className="fixed inset-y-0 left-0 z-50 hidden w-72 flex-col border-r border-slate-200 bg-white lg:flex">
+      <div className="border-b border-slate-200 px-6 py-6">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/20">
-            <Fuel className="h-6 w-6 text-slate-950 font-bold" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500 text-white shadow-sm">
+            <Fuel className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-              Fuel Ratio Monitoring System
-              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-amber-400 border border-slate-700 font-mono">
-                v2.0 Multi-Contractor
-              </span>
-            </h1>
-            <p className="text-xs text-slate-400">Mine Operations & Energy Efficiency Dashboard</p>
+            <h1 className="text-sm font-bold tracking-tight text-slate-900">Fuel Ratio Monitoring</h1>
+            <p className="mt-0.5 text-xs text-slate-500">Operasional tambang</p>
           </div>
-        </div>
-
-        {/* Live Status indicator */}
-        <div className="flex items-center gap-2 bg-slate-950/60 px-3 py-1.5 rounded-full border border-slate-800 text-xs text-slate-300">
-          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>FastAPI Live: <strong>http://127.0.0.1:8000</strong></span>
         </div>
       </div>
 
-      {/* 3 Main Feature Cards Navigation */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+      <nav className="flex-1 space-y-1 px-3 py-5" aria-label="Navigasi utama">
+        <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Menu</p>
         {features.map((feature) => {
           const Icon = feature.icon;
           const isActive = activeFeature === feature.id;
@@ -71,27 +60,72 @@ export const Header: React.FC<HeaderProps> = ({ activeFeature, setActiveFeature 
             <button
               key={feature.id}
               onClick={() => setActiveFeature(feature.id)}
-              className={`flex items-start gap-3 p-3.5 rounded-xl border text-left transition-all duration-200 relative overflow-hidden ${
+              className={`flex w-full items-start gap-3 rounded-lg px-3 py-3 text-left transition-colors ${
                 isActive
-                  ? `${feature.activeColor} shadow-md shadow-amber-500/5`
-                  : "border-slate-800 bg-slate-950/40 text-slate-400 hover:border-slate-700 hover:bg-slate-900/50"
+                  ? "bg-amber-50 text-amber-800"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
-              <div className={`p-2.5 rounded-lg ${isActive ? "bg-amber-500/20 text-amber-400" : "bg-slate-800 text-slate-400"}`}>
-                <Icon className="h-5 w-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2">
-                  <span className={`text-sm font-semibold truncate ${isActive ? "text-white" : "text-slate-300"}`}>
-                    {feature.title}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400 truncate mt-0.5">{feature.subtitle}</p>
-              </div>
+              <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${isActive ? "text-amber-600" : "text-slate-400"}`} />
+              <span>
+                <span className="block text-sm font-semibold">{feature.title}</span>
+                <span className="mt-0.5 block text-xs font-normal text-slate-500">{feature.subtitle}</span>
+              </span>
             </button>
           );
         })}
+      </nav>
+
+      <div className="m-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-xs text-slate-600">
+        <div className="flex items-center gap-2 font-medium text-slate-700">
+          <span className="h-2 w-2 rounded-full bg-emerald-500" />
+          Sistem terhubung
+        </div>
+        <p className="mt-1 text-[11px] text-slate-500">Data diperbarui dari server lokal.</p>
       </div>
-    </header>
+
+      <div className="border-t border-slate-200 px-3 py-3">
+        <section className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 shadow-sm" aria-label="Pilihan tema">
+          <div className="mb-3 flex items-center justify-between px-1">
+            <div>
+              <p className="text-xs font-bold text-slate-900">Tampilan</p>
+              <p className="mt-0.5 text-[11px] text-slate-500">Pilih tema yang nyaman</p>
+            </div>
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600">
+              {isDark ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 rounded-xl bg-slate-200/70 p-1" role="group" aria-label="Mode tampilan">
+            <button
+              type="button"
+              onClick={() => setTheme("light")}
+              aria-pressed={!isDark}
+              className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs font-semibold transition-all duration-200 ${
+                !isDark
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-900"
+              }`}
+            >
+              <Sun className="h-3.5 w-3.5" />
+              Terang
+            </button>
+            <button
+              type="button"
+              onClick={() => setTheme("dark")}
+              aria-pressed={isDark}
+              className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs font-semibold transition-all duration-200 ${
+                isDark
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "text-slate-500 hover:text-slate-900"
+              }`}
+            >
+              <Moon className="h-3.5 w-3.5" />
+              Gelap
+            </button>
+          </div>
+        </section>
+      </div>
+    </aside>
   );
 };
