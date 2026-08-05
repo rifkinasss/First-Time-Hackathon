@@ -181,16 +181,71 @@ Semua nilai konsumsi harus lebih besar dari 0. Endpoint `PUT /fuel-references/{r
 
 #### POST `/loadings/calculate`
 
+**PENTING**: Endpoint ini membuat record `Loading` dan `LoadingSummary` persisten di database. Setiap request akan menambah transaksi baru. Ini bukan operasi read-only.
+
 Single calculation:
 
 ```json
 {
   "unit_type": "EX26007",
-  "fuel_type": "EX2600-6"
+  "fuel_type": "EX2600-6",
+  "fuel_consumed_liters": 1564.0,
+  "operating_hours": 8.0
 }
 ```
 
-Batch calculation:
+Field wajib:
+- `unit_type` — unit type equipment yang ada di master
+- `fuel_type` — tipe fuel reference yang ada di master
+
+Field opsional (untuk data operasional aktual):
+- `fuel_consumed_liters` — total fuel aktual selama periode (liter), harus `> 0` jika diberikan
+- `operating_hours` — jam operasi selama periode, harus `> 0` jika diberikan
+
+Jika `fuel_consumed_liters` dan `operating_hours` keduanya diberikan dan valid, sistem menghitung `fuel_cons_actual = fuel_consumed_liters / operating_hours` dan menggunakan nilai actual untuk fuel ratio dengan `data_source = "OPERATIONAL_ACTUAL"`. Jika tidak, sistem memakai `OEM_REFERENCE` dari master equipment dan fuel reference.
+
+Response single calculation (dalam envelope). Contoh untuk equipment `qty = 3`, `productivity = 920` BCM/jam, dan `fuel_reference.average = 187` L/jam:
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "equipment_id": 5,
+    "fuel_reference_id": 8,
+    "fuel_consumed_liters": 1564.0,
+    "operating_hours": 8.0,
+    "created_at": "2026-08-05T10:30:00",
+    "summary": {
+      "id": 456,
+      "loading_id": 123,
+      "fuel_cons": 195.5,
+      "productivity": 2760.0,
+      "fuel_ratio": 0.07,
+      "fuel_cons_reference": 561.0,
+      "fuel_cons_actual": 195.5,
+      "fuel_ratio_reference": 0.2,
+      "fuel_ratio_actual": 0.07,
+      "data_source": "OPERATIONAL_ACTUAL",
+      "created_at": "2026-08-05T10:30:00"
+    }
+  }
+}
+```
+
+Field summary dihitung sebagai:
+
+```text
+fuel_cons_reference  = equipment.qty × fuel_reference.average       = 3 × 187 = 561
+productivity         = equipment.qty × equipment.productivity       = 3 × 920 = 2760
+fuel_cons_actual     = fuel_consumed_liters / operating_hours       = 1564 / 8 = 195.5
+fuel_ratio_reference = round(fuel_cons_reference / productivity, 2) = 0.20
+fuel_ratio_actual    = round(fuel_cons_actual / productivity, 2)    = 0.07
+```
+
+`fuel_cons` dan `fuel_ratio` mengikuti nilai actual bila tersedia, atau reference bila tidak.
+
+Batch calculation (tidak membuat record database):
 
 ```json
 {
@@ -221,7 +276,17 @@ Batch response berada di dalam envelope:
 }
 ```
 
-`qty`, `fuel_cons`, dan `productivity` harus lebih besar dari 0. `GET /loadings/summary` dan `POST /loadings/summary/backfill` juga memakai envelope.
+Validasi:
+- `unit_type` harus ada di master equipment dengan `activity = "Loading"`
+- `fuel_type` harus ada di master fuel reference dengan `activity = "Loading"`
+- Equipment `qty` dan `productivity` harus lebih besar dari 0
+- Batch: `qty`, `fuel_cons`, dan `productivity` harus lebih besar dari 0
+
+Error:
+- `404` — equipment atau fuel reference tidak ditemukan di master
+- `422` — validasi gagal atau productivity = 0
+
+`GET /loadings/summary` dan `POST /loadings/summary/backfill` juga memakai envelope.
 
 ### 6.2 Hauling
 
