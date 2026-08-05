@@ -13,7 +13,7 @@ from app.schemas.supporting import (
 from app.services import supporting_service, equipment_service, fuel_service
 from app.repositories import supporting_repo
 
-router = APIRouter(prefix="/supporting", tags=["Supporting"])
+router = APIRouter(prefix="/supportings", tags=["Supportings"])
 
 
 @router.post("/calculate", response_model=SupportingResponse, status_code=201)

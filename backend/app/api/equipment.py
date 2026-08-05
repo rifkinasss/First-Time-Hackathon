@@ -5,7 +5,7 @@ from app.database import get_db
 from app.schemas.equipment import EquipmentCreate, EquipmentResponse
 from app.services import equipment_service
 
-router = APIRouter(prefix="/equipment", tags=["Equipment"])
+router = APIRouter(prefix="/equipments", tags=["Equipments"])
 
 
 @router.get("", response_model=List[EquipmentResponse])

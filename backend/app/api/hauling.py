@@ -12,7 +12,7 @@ from app.schemas.hauling_distance_ref import HaulingDistanceRefResponse
 from app.services import hauling_service, equipment_service, fuel_service
 from app.repositories import hauling_distance_ref_repo, hauling_repo
 
-router = APIRouter(prefix="/hauling", tags=["Hauling"])
+router = APIRouter(prefix="/haulings", tags=["Haulings"])
 
 
 @router.get("/distance-ref", response_model=List[HaulingDistanceRefResponse])
