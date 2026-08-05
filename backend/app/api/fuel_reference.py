@@ -5,7 +5,7 @@ from app.database import get_db
 from app.schemas.fuel_reference import FuelReferenceCreate, FuelReferenceResponse
 from app.services import fuel_service
 
-router = APIRouter(prefix="/fuel-reference", tags=["Fuel Reference"])
+router = APIRouter(prefix="/fuel-references", tags=["Fuel References"])
 
 
 @router.get("", response_model=List[FuelReferenceResponse])

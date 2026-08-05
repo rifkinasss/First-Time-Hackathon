@@ -74,7 +74,11 @@ def create_loading(db: Session, data: LoadingCreate) -> Loading:
 
 
 def get_all_loadings(db: Session) -> List[Loading]:
-    return loading_repo.get_all(db)
+    return loading_repo.get_all_with_summary(db)
+
+
+def get_all_summaries(db: Session) -> List[Loading]:
+    return loading_repo.get_all_with_summary(db)
 
 
 def get_loading_or_404(db: Session, loading_id: int) -> Loading:

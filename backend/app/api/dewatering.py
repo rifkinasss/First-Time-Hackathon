@@ -13,7 +13,7 @@ from app.schemas.dewatering import (
 from app.services import dewatering_service, equipment_service, fuel_service
 from app.repositories import dewatering_repo
 
-router = APIRouter(prefix="/dewatering", tags=["Dewatering"])
+router = APIRouter(prefix="/dewaterings", tags=["Dewaterings"])
 
 
 @router.post("/calculate", response_model=DewateringResponse, status_code=201)

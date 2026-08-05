@@ -19,6 +19,23 @@ class LoadingCalculateRequest(BaseModel):
     fuel_type: str = Field(..., description="Tipe fuel reference (misal: PC200)")
 
 
+class LoadingRowInput(BaseModel):
+    unit_type: str
+    qty: int = Field(..., gt=0, description="Jumlah unit")
+    fuel_cons: float = Field(..., gt=0, description="Konsumsi fuel per unit")
+    productivity: float = Field(..., gt=0, description="Produktivitas per unit")
+
+
+class LoadingBatchCalculateRequest(BaseModel):
+    rows: list[LoadingRowInput] = Field(..., min_length=1, description="Daftar row unit")
+
+
+class LoadingBatchCalculateResponse(BaseModel):
+    total_fuel: float
+    total_productivity: float
+    fuel_ratio: float
+
+
 # ─── Summary Response ─────────────────────────────────────────────────────────
 
 class LoadingSummaryResponse(BaseModel):

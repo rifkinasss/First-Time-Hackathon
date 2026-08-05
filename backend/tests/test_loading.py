@@ -8,7 +8,7 @@ client = TestClient(app)
 # ─── Scenario 1: Valid Data ────────────────────────────────────────────────────
 def test_valid_data():
     """Fuel Ratio harus sesuai hasil Excel SPO."""
-    response = client.post("/api/loading/calculate", json={
+    response = client.post("/api/v1/loadings/calculate", json={
         "rows": [
             {"unit_type": "EX26007",   "qty": 3,  "fuel_cons": 187, "productivity": 920},
             {"unit_type": "PC125011R", "qty": 18, "fuel_cons": 59,  "productivity": 310},
@@ -24,7 +24,7 @@ def test_valid_data():
 # ─── Scenario 2: Qty = 0 ──────────────────────────────────────────────────────
 def test_qty_zero():
     """qty = 0 harus menghasilkan validation error."""
-    response = client.post("/api/loading/calculate", json={
+    response = client.post("/api/v1/loadings/calculate", json={
         "rows": [
             {"unit_type": "EX26007", "qty": 0, "fuel_cons": 187, "productivity": 920},
         ]
@@ -35,7 +35,7 @@ def test_qty_zero():
 # ─── Scenario 3: Fuel Cons = 0 ────────────────────────────────────────────────
 def test_fuel_cons_zero():
     """fuel_cons = 0 harus menghasilkan validation error."""
-    response = client.post("/api/loading/calculate", json={
+    response = client.post("/api/v1/loadings/calculate", json={
         "rows": [
             {"unit_type": "EX26007", "qty": 3, "fuel_cons": 0, "productivity": 920},
         ]
@@ -46,7 +46,7 @@ def test_fuel_cons_zero():
 # ─── Scenario 4: Productivity = 0 ─────────────────────────────────────────────
 def test_productivity_zero():
     """productivity = 0 harus menghasilkan validation error."""
-    response = client.post("/api/loading/calculate", json={
+    response = client.post("/api/v1/loadings/calculate", json={
         "rows": [
             {"unit_type": "EX26007", "qty": 3, "fuel_cons": 187, "productivity": 0},
         ]
@@ -57,5 +57,5 @@ def test_productivity_zero():
 # ─── Scenario 5: Rows Kosong ──────────────────────────────────────────────────
 def test_empty_rows():
     """rows kosong harus menghasilkan validation error."""
-    response = client.post("/api/loading/calculate", json={"rows": []})
+    response = client.post("/api/v1/loadings/calculate", json={"rows": []})
     assert response.status_code == 422

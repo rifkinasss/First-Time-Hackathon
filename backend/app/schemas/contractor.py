@@ -24,3 +24,19 @@ class ContractorResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ContractorPerformanceResponse(BaseModel):
+    contractor_id: int
+    code: str
+    company_name: str
+    actual_productivity: float = Field(..., description="Produktivitas aktual (BCM atau BCM/hr)")
+    target_productivity: float = Field(..., description="Target produktivitas standar SPO")
+    actual_fuel_cons: float = Field(..., description="Total konsumsi bahan bakar aktual (Liter)")
+    actual_fuel_ratio: float = Field(..., description="Fuel ratio aktual (L/BCM)")
+    target_fuel_ratio: float = Field(..., description="Target fuel ratio SPO (L/BCM)")
+    productivity_variance_pct: float = Field(..., description="Persentase variansi produktivitas vs SPO (%)")
+    fuel_ratio_variance_pct: float = Field(..., description="Persentase variansi fuel ratio vs SPO (%)")
+    performance_status: str = Field(..., description="Status performa: HIGH_PERFORMANCE | ON_TARGET | UNDERPERFORMING | PRODUCTIVE_BUT_INEFFICIENT")
+    rule_applied: str = Field(..., description="Aturan inferensi yang digunakan")
+    insight: str = Field(..., description="Analisis & rekomendasi manajemen berdasarkan Rule 1")

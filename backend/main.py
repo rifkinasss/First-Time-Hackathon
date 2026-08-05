@@ -16,9 +16,10 @@ Base.metadata.create_all(bind=engine)
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
-    title=settings.APP_NAME,
-    description="Backend API untuk sistem monitoring fuel ratio pada aktivitas tambang",
-    version=settings.APP_VERSION,
+    title=f"{settings.APP_NAME} RESTful API",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
 # ─── CORS Middleware ──────────────────────────────────────────────────────────
@@ -30,20 +31,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ─── Routes ───────────────────────────────────────────────────────────────────
-# GET    /equipment
-# POST   /equipment
-# GET    /fuel-reference
-# POST   /fuel-reference
-# POST   /loading/calculate
-# GET    /loading/summary
-app.include_router(contractor_router)
-app.include_router(equipment_router)
-app.include_router(fuel_reference_router)
-app.include_router(loading_router)
-app.include_router(hauling_router)
-app.include_router(supporting_router)
-app.include_router(dewatering_router)
+# ─── Execution Time Middleware ─────────────────────────────────────────────
+import time
+from fastapi import Request
+
+
+@app.middleware("http")
+async def add_execution_time_header(request: Request, call_next):
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    process_time_ms = (time.perf_counter() - start_time) * 1000
+    response.headers["X-Process-Time"] = f"{process_time_ms:.2f} ms"
+    response.headers["Server-Timing"] = f"app;dur={process_time_ms:.2f}"
+    return response
+
+# ─── RESTful API v1 Routes ───────────────────────────────────────────────────
+app.include_router(contractor_router, prefix="/api/v1")
+app.include_router(equipment_router, prefix="/api/v1")
+app.include_router(fuel_reference_router, prefix="/api/v1")
+app.include_router(loading_router, prefix="/api/v1")
+app.include_router(hauling_router, prefix="/api/v1")
+app.include_router(supporting_router, prefix="/api/v1")
+app.include_router(dewatering_router, prefix="/api/v1")
 
 
 @app.get("/")
