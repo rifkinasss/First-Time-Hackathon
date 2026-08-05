@@ -1,9 +1,5 @@
-import React from "react";
+import { redirect } from "next/navigation";
 
-export default function DashboardSubPage() {
-  return (
-    <div className="p-8 text-slate-400">
-      Dashboard Sub Page Placeholder
-    </div>
-  );
+export default function FuelRatioMonitoringRedirect() {
+	redirect("/fuel-ratio/loading");
 }

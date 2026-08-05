@@ -1,0 +1,44 @@
+{
+  "activities": {
+    "loading": [
+      {"unitType": "EX2600-6", "qty": 3, "fuelCons": 187, "productivity": 920},
+      {"unitType": "PC1250-11R", "qty": 18, "fuelCons": 59, "productivity": 310},
+      {"unitType": "PC1250SP8", "qty": 12, "fuelCons": 64, "productivity": 320},
+      {"unitType": "PC2000-11R", "qty": 18, "fuelCons": 100, "productivity": 820},
+      {"unitType": "PC2000-8", "qty": 16, "fuelCons": 100, "productivity": 480},
+      {"unitType": "PC3400", "qty": 2, "fuelCons": 12, "productivity": 940},
+      {"unitType": "PC3400EX11", "qty": 1, "fuelCons": 21, "productivity": 1160}
+    ],
+    "hauling": [
+      {"unitType": "HD7857", "qty": 400, "fuelCons": 77, "productivity": 109.5652},
+      {"unitType": "HD7858", "qty": 15, "fuelCons": 77, "productivity": 109.5652}
+    ],
+    "supporting": [
+      {"unitType": "CAT14M3", "category": "Motor Grader", "qty": 3, "fuelCons": 16},
+      {"unitType": "D155-6", "category": "Bulldozer", "qty": 8, "fuelCons": 29},
+      {"unitType": "D155A6A", "category": "Bulldozer", "qty": 4, "fuelCons": 29},
+      {"unitType": "D155A6R", "category": "Bulldozer", "qty": 36, "fuelCons": 29},
+      {"unitType": "D375-6", "category": "Bulldozer", "qty": 10, "fuelCons": 67},
+      {"unitType": "D375A6R", "category": "Bulldozer", "qty": 20, "fuelCons": 67},
+      {"unitType": "D85ESS-2", "category": "Motor Grader", "qty": 0, "fuelCons": 27},
+      {"unitType": "GD825A2", "category": "Motor Grader", "qty": 49, "fuelCons": 29}
+    ],
+    "dewatering": [
+      {"unitType": "DNDLSA6X8", "category": "Water Pump", "qty": 6, "fuelCons": 40},
+      {"unitType": "DREDGER 12/10", "category": "Water Pump", "qty": 0, "fuelCons": 75},
+      {"unitType": "DREDGERPUMP", "category": "Dredger", "qty": 7, "fuelCons": 75},
+      {"unitType": "DRHY85160B", "category": "Dredger", "qty": 9, "fuelCons": 45},
+      {"unitType": "EGS380-6", "category": "Genset", "qty": 3, "fuelCons": 10},
+      {"unitType": "EWP420", "category": "Water Pump", "qty": 40, "fuelCons": 40},
+      {"unitType": "KSB", "category": "Water Pump", "qty": 6, "fuelCons": 25},
+      {"unitType": "MEB420EXHV", "category": "Water Pump", "qty": 30, "fuelCons": 40},
+      {"unitType": "MF420E", "category": "Water Pump", "qty": 12, "fuelCons": 40},
+      {"unitType": "MF420EX", "category": "Water Pump", "qty": 6, "fuelCons": 40},
+      {"unitType": "MF420EXHV", "category": "Water Pump", "qty": 20, "fuelCons": 40},
+      {"unitType": "MFV290", "category": "Water Pump", "qty": 2, "fuelCons": 13},
+      {"unitType": "MFV290C", "category": "Water Pump", "qty": 4, "fuelCons": 13},
+      {"unitType": "MFV420EXHV", "category": "Water Pump", "qty": 20, "fuelCons": 40},
+      {"unitType": "RF85MW", "category": "Water Pump", "qty": 10, "fuelCons": 50}
+    ]
+  }
+}

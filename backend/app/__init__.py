@@ -1,1 +1,1 @@
-# app package
+"""FRMS application modules."""

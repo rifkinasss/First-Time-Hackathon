@@ -1,6 +1,8 @@
-fastapi
-uvicorn[standard]
-pydantic
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+# 2.10.4 pulls pydantic-core 2.27.2, which has no CPython 3.14 wheel.
+# 2.13.4 includes a CPython 3.14-compatible pydantic-core wheel.
+pydantic==2.13.4
 pydantic-settings
 sqlalchemy
 pytest
