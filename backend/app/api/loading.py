@@ -41,8 +41,10 @@ def calculate(data: Union[LoadingBatchCalculateRequest, LoadingCalculateRequest]
             execution_time_ms=elapsed_ms,
         )
 
-    equipment = equipment_service.get_by_unit_or_404(db, data.unit_type)
-    fuel_ref = fuel_service.get_by_type_or_404(db, data.fuel_type)
+    equipment = equipment_service.get_equipment_or_404(db, data.equipment_id)
+    fuel_ref = fuel_service.get_fuel_reference_or_404(db, data.fuel_reference_id)
+    if equipment.activity.lower() != "loading":
+        raise HTTPException(status_code=422, detail="Equipment yang dipilih bukan untuk aktivitas Loading.")
     res = loading_service.create_loading(
         db=db,
         data=LoadingCreate(

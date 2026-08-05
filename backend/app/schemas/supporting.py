@@ -17,8 +17,8 @@ class SupportingCreate(BaseModel):
 
 
 class SupportingCalculateRequest(BaseModel):
-    unit_type: str = Field(..., description="Unit type equipment (misal: CAT14M3)")
-    fuel_type: str = Field(..., description="Tipe fuel reference (misal: CAT14M3)")
+    equipment_id: int = Field(..., gt=0, description="ID equipment yang dipilih untuk transaksi")
+    fuel_reference_id: int = Field(..., gt=0, description="ID fuel reference yang dipilih")
     pa: float = Field(default=0.90, gt=0, le=1.0, description="Physical Availability (0.90 = 90%)")
     ua: float = Field(default=0.53, gt=0, le=1.0, description="Use of Availability (0.53 = 53%)")
     ewh: float = Field(default=4121.0, gt=0, description="Effective Working Hours (jam)")
@@ -92,6 +92,7 @@ class SupportingSummaryDetailResponse(BaseModel):
 
 
 class SupportingBatchCalculateRequest(BaseModel):
+    contractor_id: int = Field(..., gt=0, description="ID kontraktor pemilik equipment yang diproses")
     pa: float = Field(default=0.90, gt=0, le=1.0, description="Physical Availability (0.90 = 90%)")
     ua: float = Field(default=0.53, gt=0, le=1.0, description="Use of Availability (0.53 = 53%)")
     ewh: float = Field(default=4121.0, gt=0, description="Effective Working Hours (jam)")

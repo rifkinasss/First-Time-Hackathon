@@ -24,6 +24,7 @@ from app.models.hauling_distance_ref import HaulingDistanceRef
 from app.models.hauling import Hauling, HaulingSummary
 from app.models.supporting import Supporting, SupportingSummary
 from app.models.dewatering import Dewatering, DewateringSummary
+from app.services.demo_trend_seed import seed_loading_trend_history
 import app.models  # noqa: trigger all model registration
 
 Base.metadata.drop_all(bind=engine)
@@ -197,6 +198,8 @@ def seed():
             f"{loading_result['summary_created_or_updated']} summaries "
             f"from {loading_result['equipment_processed']} equipment rows"
         )
+        trend_points = seed_loading_trend_history(db, hours=12)
+        print(f'✅ Created {trend_points} historical Loading transactions for the 12-hour trend')
 
         # 5. Seed Hauling Distance Reference
         hauling_dist_csv = os.path.join(data_dir, 'Hauling Distance Ref - Sheet1.csv')

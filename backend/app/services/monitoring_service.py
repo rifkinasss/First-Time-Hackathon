@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.models.contractor import Contractor
 from app.models.equipment import Equipment
 from app.models.loading import Loading
+from app.models.hauling import Hauling
 from app.models.supporting import Supporting
 from app.models.dewatering import Dewatering
 from app.schemas.monitoring import (
@@ -39,11 +40,11 @@ def variance(actual: float, target: float) -> float:
     return round((actual - target) / target * 100, 2) if target else 0.0
 
 
-def make_trend(db: Session, activity: str, days: int = 21) -> List[TrendPoint]:
-    """Aggregate actual transaction summaries by their recorded date.
+def make_trend(db: Session, activity: str, points: int = 21) -> List[TrendPoint]:
+    """Aggregate actual transaction summaries by their recorded minute.
 
-    No synthetic points are generated. A single point is returned when the
-    database currently contains only one transaction date.
+    No synthetic points are generated. A new point is added as operational
+    transactions are recorded, including multiple points within one day.
     """
     config = ACTIVITIES.get(activity, {"label": activity.capitalize(), "spo_fr": 0.15})
     buckets: Dict[str, Dict[str, float]] = {}
@@ -55,9 +56,20 @@ def make_trend(db: Session, activity: str, days: int = 21) -> List[TrendPoint]:
             stamp = summary.created_at or transaction.created_at
             if not stamp:
                 continue
-            key = stamp.date().isoformat()
+            key = stamp.strftime("%Y-%m-%dT%H:%M")
             bucket = buckets.setdefault(key, {"fuel": 0.0, "production": 0.0})
             bucket["fuel"] += summary.fuel_cons_actual or summary.fuel_cons
+            bucket["production"] += summary.productivity
+    elif activity == "hauling":
+        rows = db.query(Hauling).join(Hauling.summary).join(Equipment).all()
+        for transaction in rows:
+            summary = transaction.summary
+            stamp = summary.created_at or transaction.created_at
+            if not stamp:
+                continue
+            key = stamp.strftime("%Y-%m-%dT%H:%M")
+            bucket = buckets.setdefault(key, {"fuel": 0.0, "production": 0.0})
+            bucket["fuel"] += summary.fuel_cons
             bucket["production"] += summary.productivity
     elif activity == "supporting":
         rows = db.query(Supporting).join(Supporting.summary).join(Equipment).all()
@@ -66,7 +78,7 @@ def make_trend(db: Session, activity: str, days: int = 21) -> List[TrendPoint]:
             stamp = summary.created_at or transaction.created_at
             if not stamp:
                 continue
-            key = stamp.date().isoformat()
+            key = stamp.strftime("%Y-%m-%dT%H:%M")
             bucket = buckets.setdefault(key, {"fuel": 0.0, "production": 0.0})
             bucket["fuel"] += summary.total_fuel_liters
             bucket["production"] += summary.total_mine_prod_bcm
@@ -77,12 +89,12 @@ def make_trend(db: Session, activity: str, days: int = 21) -> List[TrendPoint]:
             stamp = summary.created_at or transaction.created_at
             if not stamp:
                 continue
-            key = stamp.date().isoformat()
+            key = stamp.strftime("%Y-%m-%dT%H:%M")
             bucket = buckets.setdefault(key, {"fuel": 0.0, "production": 0.0})
             bucket["fuel"] += summary.total_fuel_liters
             bucket["production"] += summary.total_mine_prod_bcm
 
-    selected_dates = sorted(buckets)[-days:]
+    selected_dates = sorted(buckets)[-points:]
     return [
         TrendPoint(
             date=key,
@@ -291,9 +303,9 @@ def get_activity_detail(
     trend = make_trend(db, activity)
 
     if from_date:
-        trend = [t for t in trend if date.fromisoformat(t.date) >= from_date]
+        trend = [t for t in trend if date.fromisoformat(t.date[:10]) >= from_date]
     if to_date:
-        trend = [t for t in trend if date.fromisoformat(t.date) <= to_date]
+        trend = [t for t in trend if date.fromisoformat(t.date[:10]) <= to_date]
 
     contractors = get_contractors_list(db)
     config = ACTIVITIES.get(activity, {"label": activity.capitalize()})

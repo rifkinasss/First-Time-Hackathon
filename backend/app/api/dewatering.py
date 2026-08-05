@@ -24,8 +24,10 @@ def calculate_dewatering(data: DewateringCalculateRequest, db: Session = Depends
     POST /dewatering/calculate — Hitung Fuel Ratio & Total Fuel (Liter) untuk unit Dewatering.
     Berdasarkan unit_type, fuel_type, PA, UA, EWH, dan Total Produksi Tambang (BCM).
     """
-    equipment = equipment_service.get_by_unit_or_404(db, data.unit_type)
-    fuel_ref = fuel_service.get_by_type_or_404(db, data.fuel_type)
+    equipment = equipment_service.get_equipment_or_404(db, data.equipment_id)
+    fuel_ref = fuel_service.get_fuel_reference_or_404(db, data.fuel_reference_id)
+    if equipment.activity.lower() != "dewatering":
+        raise HTTPException(status_code=422, detail="Equipment yang dipilih bukan untuk aktivitas Dewatering.")
 
     create_data = DewateringCreate(
         equipment_id=equipment.id,
@@ -49,6 +51,7 @@ def calculate_all_dewatering(data: DewateringBatchCalculateRequest, db: Session 
     """
     return dewatering_service.auto_calculate_all_dewatering(
         db=db,
+        contractor_id=data.contractor_id,
         pa=data.pa,
         ua=data.ua,
         ewh=data.ewh,

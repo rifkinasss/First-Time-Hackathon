@@ -29,8 +29,10 @@ def calculate_hauling(data: HaulingCalculateRequest, db: Session = Depends(get_d
     POST /hauling/calculate — Hitung Fuel Ratio Hauling berdasarkan unit_type, fuel_type, dan distance_km.
     Sistem secara otomatis mencari BCM/HR acuan berdasarkan distance_km.
     """
-    equipment = equipment_service.get_by_unit_or_404(db, data.unit_type)
-    fuel_ref = fuel_service.get_by_type_or_404(db, data.fuel_type)
+    equipment = equipment_service.get_equipment_or_404(db, data.equipment_id)
+    fuel_ref = fuel_service.get_fuel_reference_or_404(db, data.fuel_reference_id)
+    if equipment.activity.lower() != "hauling":
+        raise HTTPException(status_code=422, detail="Equipment yang dipilih bukan untuk aktivitas Hauling.")
 
     create_data = HaulingCreate(
         equipment_id=equipment.id,

@@ -2,12 +2,10 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-poppins);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -55,7 +53,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: oklch(0.546 0.245 262.881);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -66,7 +64,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: oklch(0.546 0.245 262.881);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -75,46 +73,12 @@
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary: oklch(0.546 0.245 262.881);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
 }
 
 @layer base {
@@ -127,43 +91,71 @@
   html {
     @apply font-sans;
   }
+
+  body,
+  button,
+  input,
+  select,
+  textarea {
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+  }
 }
 
-/* Light, operational dashboard surface. These overrides keep legacy dashboard
-   components readable while their data visualisations retain semantic colours. */
-@layer utilities {
-  [class*="bg-slate-950"] { background-color: #ffffff !important; }
-  [class*="bg-slate-900"] { background-color: #ffffff !important; }
-  [class*="bg-slate-800"] { background-color: #f8fafc !important; }
-  [class*="border-slate-900"],
-  [class*="border-slate-800"],
-  [class*="border-slate-700"] { border-color: #e2e8f0 !important; }
-  [class*="divide-slate-800"] { border-color: #e2e8f0 !important; }
-  [class*="text-white"],
-  [class*="text-slate-100"],
-  [class*="text-slate-200"],
-  [class*="text-slate-300"] { color: #0f172a !important; }
-  [class*="text-slate-400"] { color: #64748b !important; }
+/* Semantic action colors for the legacy icon/text buttons. */
+button:has(svg.lucide-plus) {
+  border-color: #bfdbfe !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
 }
 
-/* Restore the dashboard's intended dark surfaces when the user selects dark mode. */
-.dark [class*="bg-white"] { background-color: #0f172a !important; }
-.dark [class*="bg-slate-950"] { background-color: #020617 !important; }
-.dark [class*="bg-slate-900"] { background-color: #0f172a !important; }
-.dark [class*="bg-slate-800"] { background-color: #1e293b !important; }
-.dark [class*="bg-slate-200"] { background-color: #334155 !important; }
-.dark [class*="bg-slate-50"] { background-color: #1e293b !important; }
-.dark [class*="border-slate-900"],
-.dark [class*="border-slate-800"],
-.dark [class*="border-slate-700"],
-.dark [class*="border-slate-200"] { border-color: #334155 !important; }
-.dark [class*="divide-slate-800"] { border-color: #334155 !important; }
-.dark [class*="text-white"],
-.dark [class*="text-slate-100"],
-.dark [class*="text-slate-200"] { color: #f8fafc !important; }
-.dark [class*="text-slate-900"],
-.dark [class*="text-slate-800"],
-.dark [class*="text-slate-700"],
-.dark [class*="text-slate-600"] { color: #e2e8f0 !important; }
-.dark [class*="text-slate-400"] { color: #94a3b8 !important; }
-.dark [class*="text-slate-300"] { color: #cbd5e1 !important; }
+/* The older dashboard classes rewrite slate backgrounds globally; keep add
+   actions blue even when those legacy classes are present. */
+button:has(svg[class~="lucide-plus"]) {
+  border-color: #bfdbfe !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+button:has(svg.lucide-plus):hover {
+  border-color: #93c5fd !important;
+  background-color: #1d4ed8 !important;
+}
+
+button[title="Edit"] {
+  border: 1px solid #fde68a !important;
+  background-color: #fffbeb !important;
+  color: #b45309 !important;
+}
+
+button[title="Edit"]:hover {
+  border-color: #fcd34d !important;
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+button[title="Hapus"] {
+  border: 1px solid #fecaca !important;
+  background-color: #fff1f2 !important;
+  color: #be123c !important;
+}
+
+button[title="Hapus"]:hover {
+  border-color: #fda4af !important;
+  background-color: #ffe4e6 !important;
+  color: #9f1239 !important;
+}
+
+/* Modal close actions sit in the conventional top-right position. */
+form.fixed:has(svg[class~="lucide-x"]) button:has(svg[class~="lucide-x"]) {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+}
+
+/* Data-management dialog backdrops: blur the existing page without adding a
+   dark color layer. This deliberately targets only full-screen modal buttons. */
+button.fixed.inset-0[class*="bg-slate-950"] {
+  background-color: transparent !important;
+  backdrop-filter: blur(4px);
+}

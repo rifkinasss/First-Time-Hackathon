@@ -12,8 +12,8 @@ class HaulingCreate(BaseModel):
 
 
 class HaulingCalculateRequest(BaseModel):
-    unit_type: str = Field(..., description="Unit type equipment (misal: HD7857)")
-    fuel_type: str = Field(..., description="Tipe fuel reference (misal: HD785-7)")
+    equipment_id: int = Field(..., gt=0, description="ID equipment yang dipilih untuk transaksi")
+    fuel_reference_id: int = Field(..., gt=0, description="ID fuel reference yang dipilih")
     distance_km: float = Field(default=3.90, gt=0, description="Jarak angkut dalam km (misal: 3.90)")
 
 

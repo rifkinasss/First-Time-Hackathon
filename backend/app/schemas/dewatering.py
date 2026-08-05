@@ -17,8 +17,8 @@ class DewateringCreate(BaseModel):
 
 
 class DewateringCalculateRequest(BaseModel):
-    unit_type: str = Field(..., description="Unit type equipment (misal: DNDLSA6X8)")
-    fuel_type: str = Field(..., description="Tipe fuel reference (misal: KSB)")
+    equipment_id: int = Field(..., gt=0, description="ID equipment yang dipilih untuk transaksi")
+    fuel_reference_id: int = Field(..., gt=0, description="ID fuel reference yang dipilih")
     pa: float = Field(default=0.90, gt=0, le=1.0, description="Physical Availability (0.90 = 90%)")
     ua: float = Field(default=0.63, gt=0, le=1.0, description="Use of Availability (0.63 = 63%)")
     ewh: float = Field(default=4899.0, gt=0, description="Effective Working Hours (jam)")
@@ -92,6 +92,7 @@ class DewateringSummaryDetailResponse(BaseModel):
 
 
 class DewateringBatchCalculateRequest(BaseModel):
+    contractor_id: int = Field(..., gt=0, description="ID kontraktor pemilik equipment yang diproses")
     pa: float = Field(default=0.90, gt=0, le=1.0, description="Physical Availability (0.90 = 90%)")
     ua: float = Field(default=0.63, gt=0, le=1.0, description="Use of Availability (0.63 = 63%)")
     ewh: float = Field(default=4899.0, gt=0, description="Effective Working Hours (jam)")

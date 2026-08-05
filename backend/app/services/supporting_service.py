@@ -108,6 +108,7 @@ def delete_supporting(db: Session, supporting_id: int) -> None:
 
 def auto_calculate_all_supporting(
     db: Session,
+    contractor_id: int,
     pa: float = 0.90,
     ua: float = 0.53,
     ewh: float = 4121.0,
@@ -116,16 +117,26 @@ def auto_calculate_all_supporting(
     operating_hours: float | None = None,
 ):
     """
-    Kalkulasi otomatis secara BATCH untuk SEMUA unit equipment yang ber-activity 'Supporting'.
-    Mengambil unit_type dan otomatis mencocokkan Ref Fuel-nya.
+    Kalkulasi otomatis secara BATCH untuk unit Supporting milik satu kontraktor.
+    Mengambil equipment dari relasi contractor_id dan otomatis mencocokkan Ref Fuel-nya.
     """
     from app.models.equipment import Equipment
     from app.models.fuel_reference import FuelReference
+    from app.models.contractor import Contractor
     from app.schemas.supporting import SupportingSummaryDetailResponse
 
-    supporting_eqs = db.query(Equipment).filter(Equipment.activity == "Supporting").all()
+    contractor = db.query(Contractor).filter(Contractor.id == contractor_id).first()
+    if not contractor:
+        raise HTTPException(status_code=404, detail=f"Kontraktor id={contractor_id} tidak ditemukan.")
+
+    supporting_eqs = (
+        db.query(Equipment)
+        .filter(Equipment.contractor_id == contractor_id)
+        .filter(Equipment.activity.ilike("supporting"))
+        .all()
+    )
     if not supporting_eqs:
-        raise HTTPException(status_code=404, detail="Tidak ada equipment dengan activity 'Supporting' di master data.")
+        raise HTTPException(status_code=404, detail=f"Tidak ada equipment Supporting untuk kontraktor '{contractor.code}'.")
 
     processed_details = []
     sum_total_liters = 0.0
@@ -172,6 +183,9 @@ def auto_calculate_all_supporting(
                     created_at=sup_obj.summary.created_at,
                 )
             )
+
+    if not processed_details:
+        raise HTTPException(status_code=422, detail="Fuel reference Supporting yang sesuai belum tersedia untuk equipment kontraktor ini.")
 
     overall_fuel_ratio = round(sum_total_liters / total_mine_prod_bcm, 4)
 
