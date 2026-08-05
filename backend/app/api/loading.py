@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.loading import (
+    LoadingCreate,
     LoadingCalculateRequest,
     LoadingBatchCalculateRequest,
     LoadingBatchCalculateResponse,
@@ -11,7 +12,7 @@ from app.schemas.loading import (
     LoadingSummaryDetailResponse,
 )
 from app.schemas.response import APIResponse, create_success_response
-from app.services import loading_service
+from app.services import loading_service, equipment_service, fuel_service
 
 router = APIRouter(prefix="/loadings", tags=["Loadings"])
 
@@ -40,10 +41,16 @@ def calculate(data: Union[LoadingBatchCalculateRequest, LoadingCalculateRequest]
             execution_time_ms=elapsed_ms,
         )
 
-    res = loading_service.calculate(
-        unit_type=data.unit_type,
-        fuel_type=data.fuel_type,
+    equipment = equipment_service.get_by_unit_or_404(db, data.unit_type)
+    fuel_ref = fuel_service.get_by_type_or_404(db, data.fuel_type)
+    res = loading_service.create_loading(
         db=db,
+        data=LoadingCreate(
+            equipment_id=equipment.id,
+            fuel_reference_id=fuel_ref.id,
+            fuel_consumed_liters=data.fuel_consumed_liters,
+            operating_hours=data.operating_hours,
+        ),
     )
     elapsed_ms = f"{(time.perf_counter() - t0) * 1000:.2f} ms"
     return create_success_response(

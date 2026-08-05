@@ -19,6 +19,8 @@ class LoadingCreate(BaseModel):
 class LoadingCalculateRequest(BaseModel):
     unit_type: str = Field(..., description="Unit type equipment (misal: EX26007)")
     fuel_type: str = Field(..., description="Tipe fuel reference (misal: PC200)")
+    fuel_consumed_liters: Optional[float] = Field(None, gt=0, description="Total fuel aktual selama periode (liter)")
+    operating_hours: Optional[float] = Field(None, gt=0, description="Jam operasi selama periode")
 
 
 class LoadingRowInput(BaseModel):
