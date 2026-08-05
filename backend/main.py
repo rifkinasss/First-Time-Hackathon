@@ -1,7 +1,13 @@
-from fastapi import FastAPI
+"""Uvicorn entrypoint for the FRMS API.
 
-app = FastAPI()
+Supports both ``uvicorn backend.main:app`` from the repository root and
+``uvicorn main:app`` from inside the backend directory.
+"""
 
-@app.get("/")
-def root():
-    return {"message": "Hello FastAPI"}
+try:
+    from .app.api import app
+except ImportError:  # pragma: no cover - compatibility for direct uvicorn usage
+    from app.api import app
+
+
+__all__ = ["app"]
