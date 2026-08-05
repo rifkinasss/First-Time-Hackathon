@@ -3,8 +3,19 @@ from sqlalchemy.orm import Session, joinedload
 from app.models.loading import Loading, LoadingSummary
 
 
-def create_loading(db: Session, equipment_id: int, fuel_reference_id: int) -> Loading:
-    obj = Loading(equipment_id=equipment_id, fuel_reference_id=fuel_reference_id)
+def create_loading(
+    db: Session,
+    equipment_id: int,
+    fuel_reference_id: int,
+    fuel_consumed_liters: Optional[float] = None,
+    operating_hours: Optional[float] = None,
+) -> Loading:
+    obj = Loading(
+        equipment_id=equipment_id,
+        fuel_reference_id=fuel_reference_id,
+        fuel_consumed_liters=fuel_consumed_liters,
+        operating_hours=operating_hours,
+    )
     db.add(obj)
     db.commit()
     db.refresh(obj)
@@ -53,3 +64,11 @@ def get_by_id(db: Session, loading_id: int) -> Optional[Loading]:
         .filter(Loading.id == loading_id)
         .first()
     )
+
+
+def delete_loading(db: Session, loading: Loading) -> bool:
+    if loading.summary:
+        db.delete(loading.summary)
+    db.delete(loading)
+    db.commit()
+    return True

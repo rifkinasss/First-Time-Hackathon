@@ -1,3 +1,4 @@
+import time
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -9,6 +10,7 @@ from app.schemas.hauling import (
     HaulingSummaryDetailResponse,
 )
 from app.schemas.hauling_distance_ref import HaulingDistanceRefResponse
+from app.schemas.response import APIResponse, create_success_response
 from app.services import hauling_service, equipment_service, fuel_service
 from app.repositories import hauling_distance_ref_repo, hauling_repo
 
@@ -61,7 +63,27 @@ def get_hauling_summaries(db: Session = Depends(get_db)):
     return result
 
 
-@router.get("/{hauling_id}", response_model=HaulingResponse)
+@router.get("/{hauling_id}", response_model=APIResponse[HaulingResponse])
 def get_hauling(hauling_id: int, db: Session = Depends(get_db)):
-    """GET /hauling/{id} — Detail transaksi Hauling beserta summary."""
-    return hauling_service.get_hauling_or_404(db, hauling_id)
+    """GET /api/v1/haulings/{id} — Detail transaksi Hauling beserta summary."""
+    t0 = time.perf_counter()
+    data = hauling_service.get_hauling_or_404(db, hauling_id)
+    elapsed_ms = f"{(time.perf_counter() - t0) * 1000:.2f} ms"
+    return create_success_response(
+        data=data,
+        message=f"Detail hauling id={hauling_id} berhasil diambil.",
+        execution_time_ms=elapsed_ms,
+    )
+
+
+@router.delete("/{hauling_id}", response_model=APIResponse[dict])
+def delete_hauling(hauling_id: int, db: Session = Depends(get_db)):
+    """DELETE /api/v1/haulings/{id} — Hapus log/transaksi kalkulasi hauling."""
+    t0 = time.perf_counter()
+    hauling_service.delete_hauling(db, hauling_id)
+    elapsed_ms = f"{(time.perf_counter() - t0) * 1000:.2f} ms"
+    return create_success_response(
+        data={"hauling_id": hauling_id},
+        message=f"Log transaksi hauling id={hauling_id} berhasil dihapus.",
+        execution_time_ms=elapsed_ms,
+    )

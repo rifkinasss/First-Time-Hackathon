@@ -11,8 +11,8 @@ def _run_calculation_engine(db: Session, supporting: Supporting) -> None:
     Calculation Engine Supporting — dipanggil otomatis saat transaksi supporting disimpan.
 
     Rumus:
-        1. fuel_cons_lhr     = equipment.qty × fuel_reference.average (L/hr)
-        2. total_fuel_liters = equipment.qty × pa × ua × ewh × fuel_reference.average (Liter)
+        1. fuel_cons_lhr     = actual_liters / operating_hours, jika actual tersedia
+        2. total_fuel_liters = actual_liters, jika actual tersedia
         3. fuel_ratio        = round(total_fuel_liters / total_mine_prod_bcm, 4)
     """
     equipment = supporting.equipment
@@ -24,8 +24,12 @@ def _run_calculation_engine(db: Session, supporting: Supporting) -> None:
     ewh = supporting.ewh
     total_mine_prod = supporting.total_mine_prod_bcm
 
-    fuel_cons_lhr = qty * fuel_ref.average
-    total_fuel_liters = qty * pa * ua * ewh * fuel_ref.average
+    fuel_cons_reference = qty * fuel_ref.average
+    fuel_ratio_reference = round((qty * pa * ua * ewh * fuel_ref.average) / total_mine_prod, 4)
+    has_actual = supporting.fuel_consumed_liters is not None and supporting.operating_hours is not None
+    fuel_cons_actual = supporting.fuel_consumed_liters / supporting.operating_hours if has_actual else None
+    fuel_cons_lhr = fuel_cons_actual if fuel_cons_actual is not None else fuel_cons_reference
+    total_fuel_liters = supporting.fuel_consumed_liters if has_actual else qty * pa * ua * ewh * fuel_ref.average
 
     if total_mine_prod == 0:
         raise ValueError("Total Mine Production BCM tidak boleh 0.")
@@ -43,6 +47,11 @@ def _run_calculation_engine(db: Session, supporting: Supporting) -> None:
         total_fuel_liters=total_fuel_liters,
         total_mine_prod_bcm=total_mine_prod,
         fuel_ratio=fuel_ratio,
+        fuel_cons_reference=fuel_cons_reference,
+        fuel_cons_actual=fuel_cons_actual,
+        fuel_ratio_reference=fuel_ratio_reference,
+        fuel_ratio_actual=fuel_ratio if has_actual else None,
+        data_source="OPERATIONAL_ACTUAL" if has_actual else "OEM_REFERENCE",
     )
 
 
@@ -66,6 +75,8 @@ def create_supporting(db: Session, data: SupportingCreate) -> Supporting:
         ua=data.ua,
         ewh=data.ewh,
         total_mine_prod_bcm=data.total_mine_prod_bcm,
+        fuel_consumed_liters=data.fuel_consumed_liters,
+        operating_hours=data.operating_hours,
     )
 
     supporting.equipment = eq_obj
@@ -101,6 +112,8 @@ def auto_calculate_all_supporting(
     ua: float = 0.53,
     ewh: float = 4121.0,
     total_mine_prod_bcm: float = 91276500.0,
+    fuel_consumed_liters: float | None = None,
+    operating_hours: float | None = None,
 ):
     """
     Kalkulasi otomatis secara BATCH untuk SEMUA unit equipment yang ber-activity 'Supporting'.
@@ -136,6 +149,8 @@ def auto_calculate_all_supporting(
             ua=ua,
             ewh=ewh,
             total_mine_prod_bcm=total_mine_prod_bcm,
+            fuel_consumed_liters=fuel_consumed_liters,
+            operating_hours=operating_hours,
         )
         sup_obj = create_supporting(db, create_data)
 
@@ -167,4 +182,3 @@ def auto_calculate_all_supporting(
         "overall_fuel_ratio": overall_fuel_ratio,
         "details": processed_details,
     }
-

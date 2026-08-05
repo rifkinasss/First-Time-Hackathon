@@ -11,6 +11,8 @@ def create_supporting(
     ua: float = 0.53,
     ewh: float = 4121.0,
     total_mine_prod_bcm: float = 91276500.0,
+    fuel_consumed_liters: float | None = None,
+    operating_hours: float | None = None,
 ) -> Supporting:
     obj = Supporting(
         equipment_id=equipment_id,
@@ -19,6 +21,9 @@ def create_supporting(
         ua=ua,
         ewh=ewh,
         total_mine_prod_bcm=total_mine_prod_bcm,
+        fuel_consumed_liters=fuel_consumed_liters,
+        operating_hours=operating_hours,
+        data_source="OPERATIONAL_ACTUAL" if fuel_consumed_liters is not None and operating_hours else "OEM_REFERENCE",
     )
     db.add(obj)
     db.commit()
@@ -36,6 +41,11 @@ def save_summary(
     total_fuel_liters: float,
     total_mine_prod_bcm: float,
     fuel_ratio: float,
+    fuel_cons_reference: float | None = None,
+    fuel_cons_actual: float | None = None,
+    fuel_ratio_reference: float | None = None,
+    fuel_ratio_actual: float | None = None,
+    data_source: str = "OEM_REFERENCE",
 ) -> SupportingSummary:
     summary = db.query(SupportingSummary).filter(SupportingSummary.supporting_id == supporting_id).first()
     if not summary:
@@ -48,6 +58,11 @@ def save_summary(
             total_fuel_liters=total_fuel_liters,
             total_mine_prod_bcm=total_mine_prod_bcm,
             fuel_ratio=fuel_ratio,
+            fuel_cons_reference=fuel_cons_reference,
+            fuel_cons_actual=fuel_cons_actual,
+            fuel_ratio_reference=fuel_ratio_reference,
+            fuel_ratio_actual=fuel_ratio_actual,
+            data_source=data_source,
         )
         db.add(summary)
     else:
@@ -58,6 +73,11 @@ def save_summary(
         summary.total_fuel_liters = total_fuel_liters
         summary.total_mine_prod_bcm = total_mine_prod_bcm
         summary.fuel_ratio = fuel_ratio
+        summary.fuel_cons_reference = fuel_cons_reference
+        summary.fuel_cons_actual = fuel_cons_actual
+        summary.fuel_ratio_reference = fuel_ratio_reference
+        summary.fuel_ratio_actual = fuel_ratio_actual
+        summary.data_source = data_source
 
     db.commit()
     db.refresh(summary)

@@ -4,6 +4,7 @@ from app.models.contractor import Contractor
 from app.models.user import User
 from app.models.equipment import Equipment
 from app.models.fuel_reference import FuelReference
+from app.models.fuzzy_configuration import FuzzyConfiguration
 from app.models.loading import Loading, LoadingSummary
 from app.models.hauling_distance_ref import HaulingDistanceRef
 from app.models.hauling import Hauling, HaulingSummary
