@@ -1,483 +1,337 @@
 # Product Requirements Document (PRD)
 
-**Project Name**  
-Fuel Ratio Monitoring System (FRMS)
+## Fuel Ratio Monitoring System (FRMS)
 
-**Version**  
-1.0
-
-**Status**  
-Draft
-
-**Phase**  
-MVP - Phase 1 (Frontend)
+| Item | Nilai |
+|---|---|
+| Versi dokumen | 1.1 |
+| Status | MVP implemented; integrasi frontend–backend masih berjalan |
+| Periode data contoh | Operasional 2026 |
+| Pemilik produk | Tim Operasional dan Mine Performance |
+| Platform | Web desktop |
 
 ---
 
-# 1. Project Overview
+## 1. Latar belakang
 
-## Background
+PT. X mengoperasikan equipment produksi dan equipment pendukung melalui beberapa kontraktor. Fuel consumption, productivity, dan fuel ratio perlu dibandingkan dengan Standar Parameter Operasi (SPO) agar penyimpangan konsumsi bahan bakar dapat ditemukan lebih cepat.
 
-PT. X memiliki beberapa kontraktor yang mengoperasikan alat produksi maupun alat pendukung dalam kegiatan operasional pertambangan. Berdasarkan hasil evaluasi operasional tahun 2026, forecast Fuel Ratio perusahaan melebihi target tahunan sebesar ±17%.
+Proses manual berbasis spreadsheet membuat analisis lintas kontraktor dan aktivitas menjadi lambat, sulit ditelusuri, serta rentan terhadap perbedaan cara perhitungan. FRMS dibangun untuk menyediakan satu sumber informasi operasional yang dapat digunakan untuk memantau Loading, Hauling, Supporting, dan Dewatering.
 
-Kondisi tersebut berpotensi meningkatkan biaya operasional serta memunculkan klaim kelebihan konsumsi bahan bakar dari kontraktor.
+## 2. Problem statement
 
-Hasil analisis awal menunjukkan beberapa penyebab utama, antara lain:
+Pengguna belum memiliki dashboard dan service API yang konsisten untuk:
 
-- Produktivitas alat produksi (Loading dan Hauling) masih berada di bawah target.
-- Jumlah Support Equipment melebihi kebutuhan operasional.
-- Penggunaan Dewatering Equipment meningkatkan konsumsi fuel.
-- Monitoring Fuel Ratio masih dilakukan secara manual menggunakan spreadsheet.
-- Belum tersedia dashboard yang mampu membandingkan data aktual terhadap Standar Parameter Operational (SPO).
+- membandingkan fuel ratio aktual dengan target SPO;
+- melihat kontribusi equipment dan kontraktor terhadap penyimpangan;
+- menghitung konsumsi serta produktivitas berdasarkan data transaksi;
+- mengubah hasil analisis menjadi rekomendasi penyelarasan fuel dan produksi.
 
----
+## 3. Tujuan produk
 
-## Problem Statement
+FRMS harus mampu:
 
-Belum terdapat sistem monitoring yang mampu mengintegrasikan data Fuel Consumption, Productivity, dan Standar Parameter Operational (SPO) sehingga perusahaan kesulitan melakukan monitoring Fuel Ratio secara cepat, akurat, dan terintegrasi.
+1. Menyajikan ringkasan performa fuel ratio berdasarkan aktivitas dan kontraktor.
+2. Menghasilkan perhitungan fuel ratio yang konsisten untuk Loading, Hauling, Supporting, dan Dewatering.
+3. Menampilkan selisih aktual terhadap target SPO dalam nilai dan persentase.
+4. Memberikan penilaian risiko equipment/kontraktor menggunakan fuzzy Mamdani.
+5. Menyediakan analisis alignment yang menghubungkan konsumsi fuel, target produksi, dampak biaya, dan tindakan operasional.
+6. Menyediakan API yang dapat digunakan oleh frontend dan integrasi lanjutan.
 
----
+## 4. Target pengguna
 
-## Objectives
+- Operational Engineer — memantau konsumsi dan produktivitas harian.
+- Mine Engineer — mengevaluasi pencapaian produksi dan Fuel Ratio.
+- Superintendent — menemukan aktivitas atau kontraktor yang memerlukan tindakan.
+- Operational Manager — melihat dampak operasional dan biaya pada tingkat ringkasan.
+- Management — membaca status alignment, risiko, dan prioritas perbaikan.
 
-Membangun aplikasi monitoring Fuel Ratio yang mampu:
+## 5. Ruang lingkup
 
-- Menampilkan kondisi Fuel Ratio secara real-time atau periodik.
-- Membandingkan Fuel Ratio aktual dengan standar SPO.
-- Mengidentifikasi penyimpangan Fuel Ratio berdasarkan aktivitas operasional.
-- Menyediakan dashboard analisis untuk mendukung pengambilan keputusan.
+### 5.1 Fitur yang sudah tersedia pada MVP
 
----
+#### Dashboard multi-kontraktor
 
-# 2. Project Scope
+Route frontend `/` menampilkan:
 
-## In Scope
+- filter contractor;
+- total equipment;
+- overall fuel ratio;
+- total production;
+- estimasi konsumsi fuel;
+- ranking performa contractor;
+- breakdown berdasarkan aktivitas;
+- detail contractor dan fleet equipment.
 
-### Dashboard
+Dashboard mengambil data contractor, equipment, serta summary Loading, Hauling, Supporting, dan Dewatering.
 
-- Executive Dashboard
-- Fuel Ratio Summary
-- Fuel Consumption Summary
-- Productivity Summary
-- Variance Summary
+#### Master data dan transaksi API
 
-### Fuel Ratio Monitoring
+Backend menyediakan CRUD atau endpoint pembacaan untuk:
 
-- Loading
-- Hauling
-- Supporting
-- Dewatering
+- contractor;
+- equipment;
+- fuel reference;
+- hauling distance reference;
+- transaksi dan summary Loading;
+- transaksi dan summary Hauling;
+- transaksi dan summary Supporting;
+- transaksi dan summary Dewatering.
 
-### SPO Management
+#### Monitoring aktivitas
 
-- Monitoring data SPO
-- Import SPO
-- Update SPO
+Service monitoring menyediakan ringkasan aktivitas dan detail unit untuk:
 
-### Master Data
+- Loading;
+- Hauling;
+- Supporting;
+- Dewatering.
 
-- Activity
-- Unit Type
-- Contractor
-- Equipment
+Detail aktivitas mendukung filter tanggal pada trend serta filter contractor dan unit pada register equipment.
 
-### Reporting
+#### Fuzzy risk assessment
 
-- Export Excel
-- Export PDF
+Engine fuzzy Mamdani menilai risiko berdasarkan kombinasi:
 
----
+- productivity;
+- jumlah/populasi equipment kontraktor;
+- rasio fuel aktual terhadap fuel reference.
 
-## Out of Scope
+Output risiko terdiri dari score `0–1`, level `LOW`, `NORMAL`, atau `HIGH`, aturan dominan, dan membership value. Konfigurasi engine memiliki versi dan disimpan di database.
 
-Phase pertama belum mencakup:
+#### SPO alignment
 
-- Login & Authentication
-- Role Management
-- AI Recommendation
-- Forecasting
-- Mobile Application
-- IoT Integration
-- Automatic Data Synchronization
+Endpoint alignment menghitung:
 
----
+- fuel aktual dan fuel target SPO;
+- fuel variance dan persentasenya;
+- dampak biaya berdasarkan harga fuel;
+- production gap;
+- produksi yang diperlukan untuk mencapai target fuel ratio;
+- status `ALIGNED`, `OVER_BUDGET`, atau `HIGHLY_EFFICIENT`;
+- breakdown per aktivitas dan action items berprioritas.
 
-# 3. Target Users
+Endpoint simulasi menerima asumsi custom agar pengguna dapat menguji skenario tanpa mengubah data database.
 
-- Operational Engineer
-- Mine Engineer
-- Superintendent
-- Manager Operational
-- Management
+### 5.2 Fitur yang tersedia di backend tetapi belum menjadi halaman frontend penuh
 
----
+- halaman monitoring per aktivitas;
+- halaman SPO/fuel reference management;
+- halaman fuel consumption berdasarkan aktivitas;
+- halaman contractor performance;
+- halaman reports;
+- UI untuk alignment dan simulasi.
 
-# 4. Business Goals
+Route placeholder untuk sebagian halaman tersebut sudah ada di frontend, tetapi belum mengonsumsi endpoint backend secara penuh.
 
-Sistem diharapkan mampu:
+### 5.3 Fitur yang direncanakan
 
-- Mengurangi waktu analisis Fuel Ratio.
-- Mempermudah identifikasi penyebab tingginya Fuel Ratio.
-- Membantu evaluasi performa kontraktor.
-- Membantu evaluasi efisiensi alat.
-- Menjadi sumber informasi operasional berbasis data.
+- authentication dan role-based access;
+- audit log perubahan data;
+- import Excel yang tervalidasi;
+- export report PDF/Excel dari data live;
+- pagination, sorting, dan advanced filtering;
+- notifikasi penyimpangan;
+- historical trend yang konsisten lintas aktivitas;
+- PostgreSQL dan migration system formal.
 
----
+## 6. Aturan perhitungan utama
 
-# 5. Dashboard Modules
+### 6.1 Loading dan Hauling
 
-## 5.1 Executive Dashboard
-
-Menampilkan ringkasan seluruh operasional.
-
-### KPI
-
-- Total Fuel Consumption
-- Total Production
-- Average Fuel Ratio
-- Total Contractor
-- Total Equipment
-- Average Productivity
-
-### Charts
-
-- Fuel Consumption Trend
-- Production Trend
-- Fuel Ratio Trend
-
-### Summary
-
-- Activity Performance
-- Contractor Performance
-- Fuel Ratio Distribution
-
----
-
-## 5.2 Fuel Ratio Monitoring
-
-Merupakan modul utama sistem.
-
-Terdiri dari empat aktivitas operasional.
-
-### Loading
-
-Monitoring Fuel Ratio aktivitas Loading.
-
-Informasi yang ditampilkan:
-
-- Fuel Consumption
-- Productivity
-- Fuel Ratio
-- Target SPO
-- Variance
-- Trend
-
----
-
-### Hauling
-
-Monitoring Fuel Ratio aktivitas Hauling.
-
-Informasi yang ditampilkan:
-
-- Fuel Consumption
-- Productivity
-- Fuel Ratio
-- Target SPO
-- Variance
-- Trend
-
----
-
-### Supporting
-
-Monitoring Fuel Ratio Support Equipment.
-
-Informasi yang ditampilkan:
-
-- PA
-- UA
-- EWH
-- Fuel Consumption
-- Fuel Ratio
-- Variance
-
----
-
-### Dewatering
-
-Monitoring Fuel Ratio Dewatering Equipment.
-
-Informasi yang ditampilkan:
-
-- PA
-- UA
-- EWH
-- Fuel Consumption
-- Fuel Ratio
-- Variance
-
----
-
-## 5.3 SPO Management
-
-Digunakan untuk mengelola Standar Parameter Operational.
-
-Data yang dikelola:
-
-- Activity
-- Unit Type
-- Quantity
-- Fuel Consumption
-- Productivity
-- Fuel Ratio
-- PA
-- UA
-- EWH
-
-Fitur:
-
-- View SPO
-- Add SPO
-- Edit SPO
-- Delete SPO
-- Import Excel
-
----
-
-## 5.4 Master Data
-
-Data referensi yang digunakan sistem.
-
-Master Data meliputi:
-
-- Activity
-- Unit Type
-- Contractor
-- Equipment
-- Equipment Category
-
----
-
-## 5.5 Reporting
-
-Laporan Fuel Ratio.
-
-Jenis laporan:
-
-- Daily
-- Weekly
-- Monthly
-
-Output:
-
-- PDF
-- Excel
-
----
-
-# 6. Navigation Structure
-
+```text
+total_fuel = Σ(quantity × fuel_consumption)
+total_productivity = Σ(quantity × productivity)
+fuel_ratio = total_fuel / total_productivity
 ```
+
+### 6.2 Supporting dan Dewatering
+
+```text
+EWH = PA × UA × hours_per_year
+total_fuel = quantity × EWH × fuel_consumption
+fuel_ratio = total_fuel / total_mine_production_bcm
+```
+
+Nilai target SPO per aktivitas disimpan pada konfigurasi monitoring. Nilai aktual, target, variance, dan data source harus dapat ditelusuri dari response API.
+
+### 6.3 Alignment
+
+```text
+target_fuel = actual_production × target_spo_fuel_ratio
+fuel_variance = actual_fuel - target_fuel
+cost_impact = fuel_variance × fuel_price_per_liter
+```
+
+Interpretasi positif pada fuel variance berarti konsumsi melebihi target.
+
+## 7. Requirement fungsional
+
+### FR-01 — Dashboard contractor
+
+Sistem harus menampilkan daftar contractor, fleet equipment, summary aktivitas, ranking fuel ratio, dan filter contractor. Perubahan contractor harus memperbarui metric, chart, dan tabel yang terlihat.
+
+### FR-02 — Monitoring aktivitas
+
+Sistem harus mengembalikan `ActivityResponse` yang berisi `units`, `trend`, `summary`, dan `contractors` untuk aktivitas yang valid.
+
+Query filter yang didukung:
+
+| Filter | Perilaku |
+|---|---|
+| `from` | membatasi tanggal awal trend |
+| `to` | membatasi tanggal akhir trend |
+| `contractor` | pencarian nama contractor secara case-insensitive |
+| `unit` | pencarian pada unit type atau category secara case-insensitive |
+
+Filter tanggal hanya membatasi trend karena record unit belum memiliki tanggal transaksi individual. Filter contractor dan unit memengaruhi unit register dan summary.
+
+### FR-03 — Monitoring overview
+
+Sistem harus menyediakan ringkasan seluruh aktivitas melalui endpoint overview. Pada implementasi saat ini endpoint overview belum menerima query filter; dukungan filter overview menjadi item integrasi berikutnya.
+
+### FR-04 — Calculation
+
+Sistem harus memvalidasi quantity, fuel consumption, productivity, PA, UA, EWH, dan total production sesuai jenis aktivitas sebelum menyimpan atau mengembalikan hasil kalkulasi.
+
+### FR-05 — Contractor performance dan fuzzy risk
+
+Sistem harus dapat mengevaluasi performa contractor dan mengembalikan risiko fuzzy per contractor maupun per unit berdasarkan konfigurasi versi aktif.
+
+### FR-06 — SPO alignment
+
+Sistem harus menyediakan analisis berbasis data operasional dan simulasi berbasis input custom tanpa mengubah data operasional.
+
+### FR-07 — Response API
+
+Endpoint yang memakai `APIResponse` harus mengembalikan `success`, `code`, `message`, `data`, dan `meta`. Error validasi harus mengembalikan status HTTP yang sesuai dan pesan yang dapat ditindaklanjuti.
+
+## 8. Requirement non-fungsional
+
+### NFR-01 — Usability
+
+- Dashboard utama dapat dipahami tanpa membaca dokumentasi teknis.
+- Metric menampilkan satuan yang jelas: Liter, L/BCM, BCM, jam, atau IDR.
+- Status risiko dan alignment menggunakan label yang konsisten.
+
+### NFR-02 — Performance
+
+- Endpoint read-only harus merespons normal dalam waktu yang sesuai untuk database MVP.
+- Perhitungan batch tidak boleh melakukan query berulang yang tidak diperlukan.
+- Frontend menampilkan loading dan error state ketika data belum tersedia.
+
+### NFR-03 — Reliability
+
+- Perhitungan harus deterministik untuk input yang sama.
+- Seed database harus dapat dijalankan ulang pada lingkungan demo.
+- Perubahan schema runtime tidak boleh menghapus data secara otomatis.
+
+### NFR-04 — Security
+
+- Authentication dan authorization wajib ditambahkan sebelum deployment production.
+- CORS tidak boleh tetap terbuka untuk semua origin pada deployment production.
+- Endpoint mutasi harus memiliki audit trail pada fase berikutnya.
+
+### NFR-05 — Compatibility
+
+- Browser utama: Chrome dan Microsoft Edge versi modern.
+- Prioritas layout: desktop; tablet menjadi prioritas berikutnya.
+- API menggunakan JSON dan tanggal ISO `YYYY-MM-DD`.
+
+## 9. Struktur navigasi target
+
+```text
 Dashboard
-│
-├── Overview
-│
+├── Contractor Monitoring              (aktif pada /)
 ├── Fuel Ratio Monitoring
-│   ├── Loading
-│   ├── Hauling
-│   ├── Supporting
-│   └── Dewatering
-│
-├── SPO Management
-│
-├── Master Data
-│
-└── Reports
+│   ├── Loading                         (backend tersedia, UI lanjutan)
+│   ├── Hauling                         (backend tersedia, UI lanjutan)
+│   ├── Supporting                      (backend tersedia, UI lanjutan)
+│   └── Dewatering                      (backend tersedia, UI lanjutan)
+├── SPO / Fuel Reference                (backend tersedia, UI lanjutan)
+├── Contractor Performance              (backend tersedia, UI lanjutan)
+├── Alignment & Simulation              (backend tersedia, UI lanjutan)
+└── Reports                             (direncanakan)
 ```
 
----
+## 10. Kriteria penerimaan MVP
 
-# 7. Dashboard Layout
+MVP dianggap memenuhi requirement apabila:
 
-```
---------------------------------------------------------
+1. Backend dapat dijalankan dengan `uvicorn main:app --reload --port 8000`.
+2. Database dapat di-seed dari CSV demo.
+3. Dashboard root dapat menampilkan data contractor, equipment, dan activity summary.
+4. Filter contractor pada dashboard memperbarui data yang terlihat.
+5. Endpoint monitoring menerima aktivitas valid dan menghasilkan schema yang terdokumentasi.
+6. Endpoint fuzzy risk menghasilkan score dan level risiko yang valid.
+7. Endpoint alignment menghasilkan variance fuel, dampak biaya, status, dan action items.
+8. Test backend dan build frontend dapat dijalankan tanpa error blocking.
 
-Sidebar
+## 11. Batasan dan risiko saat ini
 
---------------------------------------------------------
+- Client frontend masih menggunakan beberapa path API legacy yang belum memakai prefix `/api/v1`.
+- Sebagian endpoint summary belum memakai response envelope yang seragam.
+- Halaman monitoring dan analysis belum seluruhnya terhubung ke API.
+- Database default masih SQLite dan belum memiliki Alembic migration.
+- Data trend bergantung pada tanggal transaksi yang tersedia; sistem tidak membuat titik synthetic.
+- Seeder menghapus dan membuat ulang tabel database demo.
+- Belum ada authentication, authorization, audit log, atau rate limiting.
 
-Top Navigation
+## 12. Roadmap
 
---------------------------------------------------------
+### Phase 1 — MVP saat ini
 
-KPI Cards
+- database dan seed data;
+- API CRUD master data;
+- calculation engine empat aktivitas;
+- monitoring service;
+- contractor dashboard;
+- fuzzy Mamdani risk assessment;
+- SPO alignment dan simulation endpoint.
 
---------------------------------------------------------
+### Phase 2 — Integrasi aplikasi
 
-Fuel Ratio Trend
+- selaraskan client API dengan `/api/v1` dan response envelope;
+- selesaikan halaman monitoring per aktivitas;
+- tambahkan filter overview yang benar-benar memengaruhi response;
+- tambahkan UI SPO, alignment, dan contractor performance;
+- tambahkan test integrasi frontend–backend.
 
---------------------------------------------------------
+### Phase 3 — Production readiness
 
-Fuel Consumption Trend
+- authentication, role management, dan audit log;
+- PostgreSQL dan Alembic migration;
+- export report dari data live;
+- observability, backup, dan hardening CORS.
 
---------------------------------------------------------
+### Phase 4 — Advanced analytics
 
-Activity Summary
+- historical forecasting;
+- anomaly detection;
+- notification workflow;
+- integrasi IoT dan near-real-time monitoring;
+- mobile companion application.
 
---------------------------------------------------------
+## 13. Technology stack
 
-Fuel Ratio Monitoring
+### Frontend
 
---------------------------------------------------------
-
-Recent Alert
-
---------------------------------------------------------
-```
-
----
-
-# 8. Functional Requirements
-
-## Dashboard
-
-- View KPI
-- View Fuel Trend
-- View Production Trend
-- View Fuel Ratio Trend
-- View Activity Summary
-
----
-
-## Fuel Ratio Monitoring
-
-User dapat:
-
-- Melihat Fuel Ratio berdasarkan aktivitas.
-- Memfilter data berdasarkan periode.
-- Memfilter berdasarkan contractor.
-- Memfilter berdasarkan unit.
-- Melihat detail Fuel Ratio.
-- Melihat variance terhadap SPO.
-
----
-
-## SPO Management
-
-User dapat:
-
-- Menambah data SPO.
-- Mengubah data SPO.
-- Menghapus data SPO.
-- Mengimpor data SPO melalui Excel.
-
----
-
-## Master Data
-
-User dapat mengelola:
-
-- Activity
-- Unit Type
-- Contractor
-- Equipment
-
----
-
-## Reporting
-
-User dapat:
-
-- Export PDF
-- Export Excel
-
----
-
-# 9. Non Functional Requirements
-
-## Performance
-
-- Loading halaman < 3 detik.
-- Mendukung data dalam jumlah besar.
-
-## Compatibility
-
-- Chrome
-- Microsoft Edge
-
-## Responsive
-
-Prioritas:
-
-- Desktop
-
-Opsional:
-
-- Tablet
-
----
-
-# 10. MVP Deliverables
-
-Pada fase pertama, aplikasi akan menghasilkan:
-
-- Dashboard
-- Fuel Ratio Monitoring
-- SPO Management
-- Master Data
-- Reporting
-
-Seluruh data masih dapat menggunakan dummy data atau static JSON sebelum backend selesai dikembangkan.
-
----
-
-# 11. Future Roadmap
-
-## Phase 2
-
-- Authentication
-- Role Permission
-- Backend API Integration
-- PostgreSQL Integration
-
-## Phase 3
-
-- Forecast Fuel Ratio
-- AI Recommendation
-- Anomaly Detection
-- Notification System
-
-## Phase 4
-
-- IoT Integration
-- Real-time Dashboard
-- Mobile Application
-
----
-
-# 12. Technology Stack
-
-## Frontend
-
-- Next.js (App Router)
+- Next.js App Router
+- React
 - TypeScript
 - Tailwind CSS
-- shadcn/ui
-- TanStack Table
-- React Hook Form
-- Zod
-- Recharts / Apache ECharts
-- Zustand
+- lucide-react
 
-## Backend (Next Phase)
+### Backend
 
-- Laravel
-- PostgreSQL
-- Redis
+- FastAPI
+- SQLAlchemy
+- Pydantic dan pydantic-settings
+- SQLite untuk MVP
+- pytest dan httpx
 
----
+### Analytics
 
-# 13. Notes
-
-Phase pertama difokuskan pada implementasi antarmuka (Frontend) menggunakan data dummy yang merepresentasikan kondisi operasional sebenarnya. Seluruh struktur halaman, komponen, navigasi, dan alur pengguna akan disiapkan agar backend dapat diintegrasikan tanpa perubahan besar pada sisi frontend.
+- Fuzzy Mamdani
+- Membership function dan rule base terversi
+- Calculation engine berbasis aktivitas
