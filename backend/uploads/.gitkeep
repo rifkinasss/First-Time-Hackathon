@@ -1,0 +1,3 @@
+# uploads directory
+# Folder ini digunakan untuk menyimpan file yang di-upload (Excel SPO, dll)
+# File di sini tidak di-track oleh git (lihat .gitignore)

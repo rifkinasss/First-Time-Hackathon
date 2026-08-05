@@ -1,0 +1,52 @@
+Unit type list,Item,Activity,Qty (unit),Productivity (bcm/hr)
+EX26007,Excavator OB,Loading,3,"920,00"
+PC125011R,Excavator OB,Loading,18,"310,00"
+PC1250SP8,Excavator OB,Loading,12,"320,00"
+PC200011R,Excavator OB,Loading,18,"820,00"
+PC20008,Excavator OB,Loading,16,"480,00"
+PC3400,Excavator OB,Loading,2,"940,00"
+PC3400EX11,Excavator OB,Loading,1,"1160,00"
+HD7857,Dump Truck OB,Hauling,400,#REF!
+HD7858,Dump Truck OB,Hauling,15,#REF!
+DNDLSA6X8,Water Pump,Dewatering,6,
+DREDGER 12/1,Water Pump,Dewatering,2,
+DREDGERPUMP,Water Pump,Dewatering,7,
+DRHY85160B,Water Pump,Dewatering,9,
+EGS380-6,Water Pump,Dewatering,3,
+EWP420,Water Pump,Dewatering,40,
+KSB,Water Pump,Dewatering,6,
+MEB420EXHV,Water Pump,Dewatering,30,
+MF420E,Water Pump,Dewatering,12,
+MF-420E,Water Pump,Dewatering,3,
+MF420EX,Water Pump,Dewatering,6,
+MF420EXHV,Water Pump,Dewatering,20,
+MFV290,Water Pump,Dewatering,2,
+MFV290C,Water Pump,Dewatering,4,
+MFV420EXHV,Water Pump,Dewatering,20,
+RF85MW,Water Pump,Dewatering,10,
+RF-85MW,Water Pump,Dewatering,5,
+FMX440WT,Water truck,Supporting,2,
+FM9,Fuel truck,Supporting,2,
+FM9 ,Fuel truck,Supporting,1,
+FMX440FT,Fuel truck,Supporting,20,
+HD7857WT,Water truck,Supporting,22,
+P360CB6X6,Water truck,Supporting,3,
+P360CB6X6WT,Water truck,Supporting,6,
+P360CB8X4,Fuel truck,Supporting,3,
+P380CB6X6,Fuel truck,Supporting,3,
+PC200SC,Excavator Coal,Supporting,9,
+PC300,Excavator Coal,Supporting,61,
+PC400,Excavator Mud,Supporting,3,
+PC400DF,Excavator Mud,Supporting,6,
+PC800SC,Hydraulic Excavators,Supporting,2,
+PC8508R1,Excavator Support,Supporting,1,
+PC850SP8,Excavator Support,Supporting,2,
+CAT14M3,Motor Grader,Supporting,3,
+D155-6,Bulldozer,Supporting,8,
+D155A6A,"Bulldozer, Bulldozers",Supporting,4,
+D155A6R,Bulldozers,Supporting,36,
+D155A-6R,Bulldozer,Supporting,9,
+D375-6,Bulldozer,Supporting,10,
+D375A6R,Bulldozers,Supporting,20,
+D85ESS2,"Bulldozer, Bulldozers",Supporting,3,
+GD825A2,Motor Grader,Supporting,49,
